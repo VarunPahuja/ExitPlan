@@ -1,0 +1,23 @@
+# Environment variables - NEVER commit these
+backend/.env
+.env
+*.env
+backend/.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+backend/scrapers/output/
+
+# Claude
+.claude/settings.local.json
+
+# Node
+node_modules/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
