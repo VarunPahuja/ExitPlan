@@ -9,7 +9,11 @@
 
 **What Exit Plan is:** Real-time, AI-powered platform that gives international students a personalized country ranking based on their profile — scored by their own declared priorities, visualized as a force-directed knowledge graph, with proactive alerts when immigration policies change.
 
-**Current phase:** Pre-build. Nothing coded yet.
+**Current phase:** Current phase: Week 1-2 active build.
+
+Backend core complete: folder structure, Supabase schema, 
+FastAPI, auth, /rank scoring engine, /ask RAG streaming.
+Frontend: landing page in Lovable (needs polish).
 
 **Repo:** [ ADD YOUR GITHUB REPO URL HERE ]
 **Supabase project:** [ ADD SUPABASE PROJECT URL HERE ]
@@ -22,18 +26,18 @@
 
 | Layer | Status | Notes |
 |-------|--------|-------|
-| Repo + folder structure | ❌ Not started | |
-| Supabase project + schema | ❌ Not started | |
-| FastAPI skeleton | ❌ Not started | |
-| Auth (Google OAuth) | ❌ Not started | |
-| /profile endpoint | ❌ Not started | |
-| /rank endpoint | ❌ Not started | |
-| Scoring engine (user weights) | ❌ Not started | |
-| Scraper (UK, Canada, Germany) | ❌ Not started | |
-| Embedding pipeline (sentence-transformers) | ❌ Not started | |
-| pgvector setup in Supabase | ❌ Not started | |
-| /ask endpoint (RAG) | ❌ Not started | |
-| OpenRouter integration | ❌ Not started | |
+| Repo + folder structure | ✅ Done | backend/ skeleton created — all routers, services, models, workers, scrapers |
+| Supabase project + schema | ✅ Done | 001_initial_schema.sql created; run manually in Supabase SQL editor |
+│ FastAPI      │ ✅ Done  │ /health returns db:true; all 5 routers wired skeleton with stubs; uvicorn running on port 8000     
+| Auth (Google OAuth) | ✅ Done | services/auth.py: verify_jwt + get_current_user dependency; /profile and /alerts require Bearer token; /rank, /ask, /outcomes are public |
+| /profile endpoint | ✅ Done | GET returns row or 404; PUT upserts with email from JWT; models in models/user.py |
+| /rank endpoint | ✅ Done | POST /rank/ accepts RankRequest, returns RankResponse with 10 ranked countries + graph data + shareable URL |
+| Scoring engine (user weights) | ✅ Done | services/scoring.py: weighted dot-product, auto-tier, rule-based verdict, cosine-similarity graph edges (>0.85) |
+| Scraper (UK, Canada, Germany) | ✅ Done | UK (gov.uk), CA (canada.ca), DE (gesetze-im-internet.de — make-it-in-germany.com blocked by Cloudflare); runner.py has run_all_scrapers() |
+| Embedding pipeline (sentence-transformers) | ✅ Done | services/embeddings.py: chunk_text+embed+embed_and_store; services/ingest.py; backend/ingest.py CLI — 245 chunks stored |
+| pgvector setup in Supabase | ✅ Done | vector(384) column in policy_chunks; ivfflat index in 001_initial_schema.sql |
+| /ask endpoint (RAG) | ✅ Done | POST /ask/ streams SSE; mock chunks for DE/GB/CA; Gemini replaces OpenRouter |
+| OpenRouter integration | ⏭ Skipped | Using Gemini directly via services/llm.py (httpx SSE); OpenRouter not needed |
 | FlashRank reranker | ❌ Not started | |
 | Change detector | ❌ Not started | |
 | Upstash Redis + pub/sub | ❌ Not started | |
@@ -54,16 +58,17 @@
 ## 3. ACTIVE TASK
 
 **What is being worked on right now:**
-Nothing yet. Week 1 starts here.
+Lovable frontend — profile builder + results page
+
 
 **Who is working on it:**
-—
+Lovable (5 credits/day)
 
 **Started:**
-—
+2026-05-21
 
 **Expected output:**
-—
+`GET /health` returns 200. `POST /auth/login` and `GET /auth/callback` wired up via Supabase Auth.
 
 > RULE: Only one active task at a time across all agents.
 > Before starting a new task, mark the previous one complete in section 2.

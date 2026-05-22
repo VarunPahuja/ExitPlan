@@ -8,14 +8,7 @@
 
 ### Session starter (paste this EVERY time)
 ```
-I'm building Exit Plan — an AI-powered immigration country ranking platform.
-Read the project context:
 
-CURRENT STATE: [PASTE SECTION 2 OF CONTEXT.MD]
-ACTIVE TASK: [PASTE THE SPECIFIC TASK]
-FOLDER STRUCTURE: backend/ contains FastAPI app. frontend/ is owned by Lovable — do not touch it.
-STACK: FastAPI, Supabase (Postgres + pgvector + Auth), Upstash Redis, Celery, sentence-transformers, OpenRouter, LangChain, Resend.
-RULE: Only modify files relevant to this task. Tell me what to update in CONTEXT.md when done.
 ```
 
 ### Week 1 — Task 1: Repo + folder structure

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "PowerShell(pip install *)",
+      "PowerShell(python D:\\\\Coding\\\\ExitPlan\\\\backend\\\\db\\\\run_migrations.py)",
+      "PowerShell(python D:\\\\Coding\\\\ExitPlan\\\\backend\\\\db\\\\test_connection.py)",
+      "PowerShell(python -c \"import fastapi, uvicorn; print\\('fastapi', fastapi.__version__\\); print\\('uvicorn', uvicorn.__version__\\)\")",
+      "PowerShell(Start-Process python -ArgumentList \"-m uvicorn main:app --host 0.0.0.0 --port 8000 --reload\" -WorkingDirectory \"D:\\\\Coding\\\\ExitPlan\\\\backend\" -WindowStyle Hidden -PassThru | Select-Object Id)",
+      "PowerShell(Start-Sleep -Seconds 3; python -c \"import urllib.request, json; r = urllib.request.urlopen\\('http://localhost:8000/health'\\); print\\(json.loads\\(r.read\\(\\)\\)\\)\")",
+      "Bash(pip show *)",
+      "Bash(findstr \"Name\\\\|Version\\\\|not found\")"
+    ]
+  }
+}

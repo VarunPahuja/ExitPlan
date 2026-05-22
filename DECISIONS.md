@@ -76,6 +76,12 @@
 **Reason:** Resend free tier is 3,000 emails/month. Cleaner API than SendGrid. Better developer experience. Free forever at MVP scale.
 **Revisit if:** 3,000 emails/month is exceeded.
 
+### ADR-010: Gemini API directly instead of OpenRouter
+Decision: Use Google AI Studio API key directly with Gemini 2.5 Flash.
+Reason: Student account has access to Gemini 2.5 Flash free. Better 
+model than any free OpenRouter option. One less service to manage.
+Revisit if: API key gets rate-limited heavily in production.
+
 ---
 
 ## PRODUCT DECISIONS
