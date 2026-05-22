@@ -1,14 +1,17 @@
 """
 RAG (Retrieval-Augmented Generation) query engine.
 
-Week 3: mock chunk retrieval backed by hardcoded policy snippets.
-Week 4: replace retrieve() with pgvector similarity search + FlashRank reranking.
+retrieve() does a real pgvector cosine similarity search via a Postgres RPC
+function (match_policy_chunks). MOCK_CHUNKS are kept as a fallback when the
+country has no indexed chunks or the DB is unreachable.
 """
 
 import json
 from collections.abc import AsyncGenerator
 
 from services import llm
+
+# ── Fallback data (used when pgvector returns no results) ─────────────────────
 
 MOCK_CHUNKS: dict[str, list[dict]] = {
     "DE": [
@@ -101,20 +104,137 @@ MOCK_CHUNKS: dict[str, list[dict]] = {
 }
 
 
-async def retrieve(query: str, country_code: str, k: int = 3) -> list[dict]:
-    """Return top-k mock policy chunks for the given country.
+# ── Real retrieval ─────────────────────────────────────────────────────────────
 
-    Falls back to GB chunks when the country isn't in the mock set.
-    Real pgvector retrieval replaces this in Week 4.
+async def _vector_search(query: str, country_code: str, k: int = 5) -> list[dict]:
+    """Return top-k policy chunks via pgvector cosine similarity.
+
+    Falls back to MOCK_CHUNKS if the country has no indexed chunks or the
+    RPC call fails (e.g. function not yet deployed, DB unreachable).
     """
-    return MOCK_CHUNKS.get(country_code.upper(), MOCK_CHUNKS["GB"])[:k]
+    code = country_code.upper()
+    try:
+        from db.client import admin_client
+        from services.embeddings import embed
 
+        client = admin_client()
+
+        country_result = (
+            client.table("countries").select("id").eq("code", code).execute()
+        )
+        if not country_result.data:
+            return _mock_fallback(code, k)
+
+        country_id = country_result.data[0]["id"]
+
+        vector = embed([query])[0]
+        vector_str = "[" + ",".join(f"{v:.8f}" for v in vector) + "]"
+
+        rpc_result = client.rpc(
+            "match_policy_chunks",
+            {
+                "query_embedding": vector_str,
+                "match_country_id": country_id,
+                "match_count": k,
+            },
+        ).execute()
+
+        if not rpc_result.data:
+            return _mock_fallback(code, k)
+
+        return [
+            {
+                "content": row["content"],
+                "source_url": row["source_url"],
+                "visa_type": row["visa_type"],
+                "similarity": row.get("similarity"),
+            }
+            for row in rpc_result.data
+        ]
+
+    except Exception as exc:
+        print(f"[rag._vector_search] error for {code}: {exc!r} — using mock fallback")
+        return _mock_fallback(code, k)
+
+
+async def keyword_search(
+    query: str, country_code: str, k: int = 5
+) -> list[dict]:
+    """Return chunks that contain query keywords via Supabase ilike filter."""
+    from db.client import admin_client
+
+    client = admin_client()
+
+    country = (
+        client.table("countries")
+        .select("id")
+        .eq("code", country_code.upper())
+        .execute()
+    )
+    if not country.data:
+        return []
+    country_id = country.data[0]["id"]
+
+    terms = [w for w in query.lower().split() if len(w) > 3]
+
+    results = []
+    seen: set[str] = set()
+    for term in terms[:4]:
+        rows = (
+            client.table("policy_chunks")
+            .select("content,source_url,visa_type")
+            .eq("country_id", country_id)
+            .ilike("content", f"%{term}%")
+            .limit(k)
+            .execute()
+        )
+        for row in rows.data:
+            key = row["content"][:100]
+            if key not in seen:
+                seen.add(key)
+                results.append({
+                    "content": row["content"],
+                    "source_url": row["source_url"],
+                    "visa_type": row["visa_type"],
+                    "similarity": 0.85,
+                })
+    return results[:k]
+
+
+async def retrieve(query: str, country_code: str, k: int = 5) -> list[dict]:
+    """Hybrid retrieval: merge vector search and keyword search results.
+
+    Both searches run concurrently. Results are deduplicated by the first 100
+    chars of content and capped at k total chunks.
+    """
+    import asyncio as _asyncio
+
+    vector_res, keyword_res = await _asyncio.gather(
+        _vector_search(query, country_code, k),
+        keyword_search(query, country_code, k),
+    )
+
+    seen: set[str] = set()
+    merged: list[dict] = []
+    for chunk in vector_res + keyword_res:
+        key = chunk["content"][:100]
+        if key not in seen:
+            seen.add(key)
+            merged.append(chunk)
+    return merged[:k]
+
+
+def _mock_fallback(country_code: str, k: int) -> list[dict]:
+    return MOCK_CHUNKS.get(country_code, MOCK_CHUNKS["GB"])[:k]
+
+
+# ── Streaming answer ───────────────────────────────────────────────────────────
 
 async def ask(
     query: str, country_code: str, user_profile: dict
 ) -> AsyncGenerator[str, None]:
     """Retrieve context chunks, stream Gemini answer as SSE, then emit citations."""
-    chunks = await retrieve(query, country_code)
+    chunks = await retrieve(query, country_code, k=10)
 
     context_parts = [
         f"{c['content']} (Source: {c['source_url']})" for c in chunks
@@ -122,10 +242,20 @@ async def ask(
     context = "\n\n".join(context_parts)
 
     prompt = (
+        f"You are helping someone understand immigration rules.\n\n"
         f"User profile: {user_profile}\n\n"
-        f"Policy context:\n{context}\n\n"
+        f"Below are excerpts from official government immigration "
+        f"documents. Read them carefully — they may use legal language "
+        f"but contain the answer:\n\n"
+        f"{context}\n\n"
         f"Question: {query}\n\n"
-        "Answer based only on the context above."
+        f"Instructions:\n"
+        f"- If the answer is in the documents (even in legal language), "
+        f"extract and explain it in plain English\n"
+        f"- Include specific figures, thresholds, or requirements "
+        f"mentioned in the text\n"
+        f"- Cite which source document you found the information in\n"
+        f"- If the information is genuinely not present, say so clearly"
     )
 
     async for chunk in llm.generate(prompt, context):

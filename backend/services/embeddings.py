@@ -37,23 +37,26 @@ def embed(texts: list[str]) -> list[list[float]]:
     return _model.encode(texts).tolist()
 
 
-async def embed_and_store(docs: list[dict]) -> int:
+async def embed_and_store(
+    docs: list[dict],
+    use_string_format: bool = True,
+) -> int:
     """Chunk, embed, and insert documents into the policy_chunks table.
 
-    Returns the total number of chunks written to Supabase.
-    Vectors are passed as pgvector-format strings: '[v1,v2,...]'.
+    Returns the total number of chunks successfully written to Supabase.
+
+    use_string_format=True  → embedding sent as '[v1,v2,...]' string
+    use_string_format=False → embedding sent as plain Python list[float]
     """
     from db.client import admin_client
 
     client = admin_client()
     today = date.today().isoformat()
 
-    # Build country_code → country_id lookup (one round-trip)
     countries = client.table("countries").select("id,code").execute()
     country_map: dict[str, str] = {r["code"]: r["id"] for r in countries.data}
 
     total = 0
-    BATCH = 50
 
     for doc in docs:
         code = doc["country_code"]
@@ -67,25 +70,33 @@ async def embed_and_store(docs: list[dict]) -> int:
             continue
 
         vectors = embed(chunks)
+        ok = 0
 
-        rows = [
-            {
+        for chunk, vector in zip(chunks, vectors):
+            embedding_value = (
+                "[" + ",".join(f"{v:.8f}" for v in vector) + "]"
+                if use_string_format
+                else vector
+            )
+            row = {
                 "country_id": country_id,
                 "visa_type": doc["visa_type"],
                 "content": chunk,
                 "source_url": doc["source_url"],
                 "effective_date": today,
-                # pgvector expects the string form '[v1,v2,...]' via PostgREST
-                "embedding": "[" + ",".join(f"{v:.8f}" for v in vector) + "]",
+                "embedding": embedding_value,
                 "scraped_at": doc["scraped_at"],
             }
-            for chunk, vector in zip(chunks, vectors)
-        ]
+            try:
+                result = client.table("policy_chunks").insert(row).execute()
+                if not result.data:
+                    print(f"  [warn] empty response | {chunk[:50]!r}")
+                else:
+                    ok += 1
+            except Exception as e:
+                print(f"  [error] {e} | {chunk[:50]!r}")
 
-        for i in range(0, len(rows), BATCH):
-            client.table("policy_chunks").insert(rows[i : i + BATCH]).execute()
-
-        total += len(rows)
-        print(f"  [{code}] {doc['visa_type']:<35} {len(rows):>4} chunks")
+        total += ok
+        print(f"  [{code}] {doc['visa_type']:<35} {ok:>4}/{len(chunks)} chunks stored")
 
     return total

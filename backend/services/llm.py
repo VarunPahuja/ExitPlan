@@ -22,11 +22,14 @@ _MODEL_PRIMARY = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 _MODEL_PREMIUM = os.getenv("GEMINI_MODEL_PREMIUM", "gemini-2.5-flash")
 
 _SYSTEM_INSTRUCTION = (
-    "You are an immigration advisor for Exit Plan. "
-    "Answer based ONLY on the provided policy context below. "
-    "If the answer is not in the context, say so clearly. "
-    "Always cite the source URL at the end of your answer. "
-    "Be concise and direct."
+    "You are an immigration advisor for Exit Plan. You are given "
+    "excerpts from official government immigration documents. "
+    "These may be dense legal texts. Extract and explain the "
+    "relevant information in plain English. If the context "
+    "contains relevant information even in legal language, "
+    "interpret and explain it clearly. Always cite the source URL. "
+    "If you truly cannot find relevant information, say so — but "
+    "look carefully at the full legal text before concluding that."
 )
 
 _FALLBACK_ERROR = "I couldn't retrieve that information right now. Please try again."

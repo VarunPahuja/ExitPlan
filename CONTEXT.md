@@ -36,7 +36,7 @@ Frontend: landing page in Lovable (needs polish).
 | Scraper (UK, Canada, Germany) | ✅ Done | UK (gov.uk), CA (canada.ca), DE (gesetze-im-internet.de — make-it-in-germany.com blocked by Cloudflare); runner.py has run_all_scrapers() |
 | Embedding pipeline (sentence-transformers) | ✅ Done | services/embeddings.py: chunk_text+embed+embed_and_store; services/ingest.py; backend/ingest.py CLI — 245 chunks stored |
 | pgvector setup in Supabase | ✅ Done | vector(384) column in policy_chunks; ivfflat index in 001_initial_schema.sql |
-| /ask endpoint (RAG) | ✅ Done | POST /ask/ streams SSE; mock chunks for DE/GB/CA; Gemini replaces OpenRouter |
+| /ask endpoint (RAG) | ✅ Done | POST /ask/ streams SSE; real pgvector search via match_policy_chunks RPC; mock fallback if no chunks |
 | OpenRouter integration | ⏭ Skipped | Using Gemini directly via services/llm.py (httpx SSE); OpenRouter not needed |
 | FlashRank reranker | ❌ Not started | |
 | Change detector | ❌ Not started | |
