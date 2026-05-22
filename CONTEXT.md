@@ -1,7 +1,7 @@
 # EXIT PLAN — CONTEXT.md
 > The single source of truth for all agents (Claude Code, Antigravity, Lovable, Claude claude.ai).
 > Read this before starting any session. Update this after every session.
-> Last updated: Week 0 (pre-build)
+> Last updated: 2026-05-22
 
 ---
 
@@ -32,7 +32,8 @@ Frontend: landing page in Lovable (needs polish).
 | Auth (Google OAuth) | ✅ Done | services/auth.py: verify_jwt + get_current_user dependency; /profile and /alerts require Bearer token; /rank, /ask, /outcomes are public |
 | /profile endpoint | ✅ Done | GET returns row or 404; PUT upserts with email from JWT; models in models/user.py |
 | /rank endpoint | ✅ Done | POST /rank/ accepts RankRequest, returns RankResponse with 10 ranked countries + graph data + shareable URL |
-| Scoring engine (user weights) | ✅ Done | services/scoring.py: weighted dot-product, auto-tier, rule-based verdict, cosine-similarity graph edges (>0.85) |
+| Scoring engine (user weights) | ✅ Done | services/scoring.py: weighted dot-product, auto-tier, rule-based verdict, cosine-similarity graph edges (>0.85); field-specific job_market scores via data/country_scores.py |
+| Research-backed scoring data | ✅ Done | data/country_scores.py: COUNTRY_DATA (per-field job_market), COUNTRY_META (visa_types, pr_timeline_years); Literal field validation in models/profile.py |
 | Scraper (UK, Canada, Germany) | ✅ Done | UK (gov.uk), CA (canada.ca), DE (gesetze-im-internet.de — make-it-in-germany.com blocked by Cloudflare); runner.py has run_all_scrapers() |
 | Embedding pipeline (sentence-transformers) | ✅ Done | services/embeddings.py: chunk_text+embed+embed_and_store; services/ingest.py; backend/ingest.py CLI — 245 chunks stored |
 | pgvector setup in Supabase | ✅ Done | vector(384) column in policy_chunks; ivfflat index in 001_initial_schema.sql |
@@ -58,17 +59,18 @@ Frontend: landing page in Lovable (needs polish).
 ## 3. ACTIVE TASK
 
 **What is being worked on right now:**
-Lovable frontend — profile builder + results page
+None — backend scoring engine update complete.
 
+Next: Lovable frontend — profile builder + results page.
 
 **Who is working on it:**
-Lovable (5 credits/day)
+—
 
 **Started:**
-2026-05-21
+—
 
 **Expected output:**
-`GET /health` returns 200. `POST /auth/login` and `GET /auth/callback` wired up via Supabase Auth.
+—
 
 > RULE: Only one active task at a time across all agents.
 > Before starting a new task, mark the previous one complete in section 2.

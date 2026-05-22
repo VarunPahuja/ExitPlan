@@ -2,6 +2,8 @@
 Pydantic models for rank requests and responses.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, model_validator
 
 
@@ -32,7 +34,7 @@ class UserWeights(BaseModel):
 class RankRequest(BaseModel):
     nationality: str
     current_status: str  # student | post_study | employed
-    field: str
+    field: Literal["computer_science", "data_science", "engineering", "business", "medicine", "law", "design", "finance", "other"]
     degree_level: str    # bachelors | masters | phd | diploma
     savings_range: str   # 0_5L | 5_15L | 15L_plus
     career_goal: str     # long_term_pr | work_experience | return_home
