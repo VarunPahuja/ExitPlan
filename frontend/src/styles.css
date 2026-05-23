@@ -1,0 +1,146 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-cta: var(--cta);
+  --color-cta-foreground: var(--cta-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* warm off-white */
+  --background: oklch(0.985 0.005 90);
+  --foreground: oklch(0.18 0.02 270);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 270);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 270);
+
+  /* electric indigo #5B4FE8 */
+  --primary: oklch(0.55 0.22 280);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.96 0.01 270);
+  --secondary-foreground: oklch(0.2 0.02 270);
+
+  --muted: oklch(0.95 0.005 90);
+  --muted-foreground: oklch(0.5 0.02 270);
+
+  --accent: oklch(0.95 0.03 285);
+  --accent-foreground: oklch(0.25 0.05 280);
+
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.9 0.01 270);
+  --input: oklch(0.92 0.01 270);
+  --ring: oklch(0.55 0.22 280);
+
+  /* sunrise orange #FF6B35 */
+  --cta: oklch(0.7 0.2 38);
+  --cta-foreground: oklch(0.99 0 0);
+
+  --success: oklch(0.72 0.18 145); /* #22C55E */
+  --warning: oklch(0.78 0.16 75);  /* #F59E0B */
+  --danger: oklch(0.62 0.22 25);
+
+  --sidebar: oklch(0.99 0.003 90);
+  --sidebar-foreground: oklch(0.18 0.02 270);
+  --sidebar-primary: oklch(0.55 0.22 280);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.03 285);
+  --sidebar-accent-foreground: oklch(0.25 0.05 280);
+  --sidebar-border: oklch(0.9 0.01 270);
+  --sidebar-ring: oklch(0.55 0.22 280);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.animate-fade-in-up { animation: fade-in-up 0.5s ease-out both; }
+.skeleton {
+  background: linear-gradient(90deg, oklch(0.94 0.005 90) 0%, oklch(0.97 0.005 90) 50%, oklch(0.94 0.005 90) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 40s linear infinite; }
+
+html { scroll-behavior: smooth; }
+
