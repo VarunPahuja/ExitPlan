@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowLeft, Send, Loader2 } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/country/$code")({
   component: CountryDetail,
 });
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 const TABS = ["Overview", "Visa Types", "PR Pathway", "Job Market", "Recent Changes"] as const;
 type Tab = (typeof TABS)[number];
@@ -60,7 +62,7 @@ function CountryDetail() {
         </div>
 
         <div className="lg:col-span-2">
-          <ChatPanel countryName={country.name} />
+          <ChatPanel countryName={country.name} countryCode={code} />
         </div>
       </div>
     </div>
@@ -77,21 +79,80 @@ function tabCopy(tab: Tab, name: string) {
   }
 }
 
-function ChatPanel({ countryName }: { countryName: string }) {
+type Msg = { role: "user" | "assistant"; text: string };
+
+function ChatPanel({ countryName, countryCode }: { countryName: string; countryCode: string }) {
   const [input, setInput] = useState("");
-  const [msgs, setMsgs] = useState<{ role: "user" | "assistant"; text: string }[]>([
+  const [streaming, setStreaming] = useState(false);
+  const [msgs, setMsgs] = useState<Msg[]>([
     { role: "assistant", text: `Hi! Ask me anything about living and working in ${countryName}. I'll answer based on official sources.` },
   ]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const send = (e: React.FormEvent) => {
+  const appendToLast = (chunk: string) => {
+    setMsgs((m) => {
+      const updated = [...m];
+      updated[updated.length - 1] = {
+        ...updated[updated.length - 1],
+        text: updated[updated.length - 1].text + chunk,
+      };
+      return updated;
+    });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || streaming) return;
     const q = input.trim();
     setInput("");
-    setMsgs((m) => [...m, { role: "user", text: q }]);
-    setTimeout(() => {
-      setMsgs((m) => [...m, { role: "assistant", text: `Here's what I found about "${q}" for ${countryName}. (Connect an AI provider to get real answers.)` }]);
-    }, 600);
+    setMsgs((m) => [...m, { role: "user", text: q }, { role: "assistant", text: "" }]);
+    setStreaming(true);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/ask/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: q,
+          country_code: countryCode,
+          user_profile: {},
+        }),
+      });
+
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value);
+        for (const line of text.split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (!data.done && data.chunk) {
+              appendToLast(data.chunk);
+            }
+            if (data.done && data.citations?.length) {
+              const sources = (data.citations as { source_url: string }[])
+                .map((c) => c.source_url)
+                .filter(Boolean)
+                .join(" · ");
+              if (sources) appendToLast(`\n\nSources: ${sources}`);
+            }
+          } catch {
+            // skip malformed SSE line
+          }
+        }
+      }
+    } catch {
+      appendToLast("Sorry, couldn't reach the backend. Make sure it's running on port 8000.");
+    } finally {
+      setStreaming(false);
+    }
   };
 
   return (
@@ -104,29 +165,37 @@ function ChatPanel({ countryName }: { countryName: string }) {
           <div
             key={i}
             className={cn(
-              "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+              "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
               m.role === "assistant"
                 ? "bg-accent text-accent-foreground"
                 : "ml-auto bg-primary text-primary-foreground",
             )}
           >
             {m.text}
+            {streaming && i === msgs.length - 1 && m.role === "assistant" && !m.text && (
+              <span className="inline-flex items-center gap-1 text-xs opacity-60">
+                <Loader2 className="h-3 w-3 animate-spin" /> Thinking…
+              </span>
+            )}
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
       <form onSubmit={send} className="flex items-center gap-2 border-t border-border bg-background p-3">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask anything about visas, jobs, PR..."
-          className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+          disabled={streaming}
+          className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary disabled:opacity-50"
         />
         <button
           type="submit"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
+          disabled={streaming || !input.trim()}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           aria-label="Send"
         >
-          <Send className="h-4 w-4" />
+          {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </button>
       </form>
     </div>

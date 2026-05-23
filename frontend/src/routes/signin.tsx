@@ -1,6 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/signin")({
   component: SignIn,
@@ -20,25 +21,21 @@ function GoogleIcon() {
 }
 
 function SignIn() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const handleGoogle = async () => {
     setLoading(true);
     try {
-      // Lovable Cloud / Supabase isn't wired yet — mock sign-in.
-      // When backend is connected, replace this block with:
-      // await supabase.auth.signInWithOAuth({ provider: 'google' })
-      await new Promise((r) => setTimeout(r, 600));
-      localStorage.setItem(
-        "exitplan_user",
-        JSON.stringify({ email: "you@exitplan.app", provider: "google" }),
-      );
-      toast.success("Signed in");
-      navigate({ to: "/results" });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/results",
+        },
+      });
+      if (error) throw error;
+      // Browser will redirect to Google — loading stays true intentionally
     } catch {
-      toast.error("Sign in failed");
-    } finally {
+      toast.error("Sign in failed. Please try again.");
       setLoading(false);
     }
   };
@@ -67,7 +64,7 @@ function SignIn() {
           style={{ background: INDIGO }}
         >
           <GoogleIcon />
-          {loading ? "Signing in…" : "Continue with Google"}
+          {loading ? "Redirecting…" : "Continue with Google"}
         </button>
 
         <p className="mt-4 text-center text-xs text-black/45">No password needed.</p>

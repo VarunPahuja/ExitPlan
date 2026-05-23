@@ -25,7 +25,7 @@ app = FastAPI(
 
 # Always allow localhost:3000 for local dev plus whatever FRONTEND_URL is set to
 _frontend = os.getenv("FRONTEND_URL", "http://localhost:3000")
-_origins = list({_frontend, "http://localhost:3000"})
+_origins = list({_frontend, "http://localhost:3000", "http://localhost:5173"})
 
 app.add_middleware(
     CORSMiddleware,

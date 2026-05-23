@@ -1,28 +1,29 @@
-import { Link, useLocation, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-
-function readUser(): { email: string } | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("exitplan_user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
 export function Navbar() {
-  const location = useLocation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const onDashboard = location.pathname.startsWith("/dashboard");
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    setUser(readUser());
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, [pathname]);
 
-  const initial = user?.email?.[0]?.toUpperCase() ?? "A";
+  const email = session?.user?.email ?? null;
+  const initial = email?.[0]?.toUpperCase() ?? null;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur">
@@ -37,12 +38,12 @@ export function Navbar() {
           >
             Dashboard
           </Link>
-          {user ? (
+          {initial ? (
             <div
-              title={user.email}
+              title={email ?? ""}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-display text-sm font-semibold"
             >
-              {onDashboard ? "AS" : initial}
+              {initial}
             </div>
           ) : (
             <Link to="/signin">

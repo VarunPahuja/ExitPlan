@@ -10,7 +10,12 @@
       "PowerShell(Start-Sleep -Seconds 3; python -c \"import urllib.request, json; r = urllib.request.urlopen\\('http://localhost:8000/health'\\); print\\(json.loads\\(r.read\\(\\)\\)\\)\")",
       "Bash(pip show *)",
       "Bash(findstr \"Name\\\\|Version\\\\|not found\")",
-      "Bash(python scrapers/md_ingest.py)"
+      "Bash(python scrapers/md_ingest.py)",
+      "Bash(grep -rn \"lovable\" . --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.json\" --include=\"*.toml\" --include=\"*.jsonc\" --exclude-dir=node_modules)",
+      "Bash(grep -rn \"localhost:8000\" src/ --include=\"*.ts\" --include=\"*.tsx\")",
+      "Bash(grep -rn \"eyJhbGci\\\\|supabase\\\\.co\\\\|service_role\" src/)",
+      "Bash(ls .lovable)",
+      "Bash(python -c \"import json; d=json.load\\(open\\('package.json'\\)\\); print\\('name:', d['name']\\); print\\('lovable deps:', [k for k in {**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)} if 'lovable' in k]\\)\")"
     ]
   }
 }
