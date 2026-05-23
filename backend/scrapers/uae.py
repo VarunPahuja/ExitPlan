@@ -1,8 +1,14 @@
 """
-UK immigration policy scraper — Scrapy spider.
+UAE immigration policy scraper — Scrapy spider.
 
-Scrapes gov.uk visa pages, extracts clean body text (headings, paragraphs,
-salary figures, date references), and yields one document per page.
+Sources: en.wikipedia.org — Wikipedia's Golden visa article (47K chars) covers the
+UAE Golden Visa program in depth, including investor requirements, salary thresholds,
+10-year renewable visa rules, and eligible professions. The Expatriates in the UAE
+article (19K chars) covers work permit categories and employer sponsorship.
+
+u.ae (official portal) and government.ae both TCP-timeout from non-UAE IP addresses —
+they appear geo-blocked. mohre.gov.ae requires session authentication. Wikipedia
+provides verified, detailed coverage of UAE immigration categories.
 """
 
 import re
@@ -12,30 +18,18 @@ import scrapy
 from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
-    "skilled-worker-visa": "Skilled Worker",
-    "graduate-visa": "Graduate Route",
-    "global-talent-visa": "Global Talent",
-    "high-potential-individual-visa": "High Potential Individual",
-    "indefinite-leave-to-remain": "Indefinite Leave to Remain",
-    "settlement-refugee-or-humanitarian-protection": "Settlement",
-    "uk-ancestry-visa": "UK Ancestry",
-    "innovator-founder-visa": "Innovator Founder",
+    "Golden_visa": "Golden Visa",
+    "Expatriates_in_the_United_Arab_Emirates": "UAE Work & Residency",
 }
 
 _DEFAULT_URLS = [
-    "https://www.gov.uk/skilled-worker-visa",
-    "https://www.gov.uk/graduate-visa",
-    "https://www.gov.uk/global-talent-visa",
-    "https://www.gov.uk/high-potential-individual-visa",
-    "https://www.gov.uk/indefinite-leave-to-remain",
-    "https://www.gov.uk/settlement-refugee-or-humanitarian-protection",
-    "https://www.gov.uk/uk-ancestry-visa",
-    "https://www.gov.uk/innovator-founder-visa",
+    "https://en.wikipedia.org/wiki/Golden_visa",
+    "https://en.wikipedia.org/wiki/Immigration_to_the_United_Arab_Emirates",
 ]
 
 
-class UKSpider(scrapy.Spider):
-    name = "uk_immigration"
+class UAESpider(scrapy.Spider):
+    name = "uae_immigration"
     start_urls = _DEFAULT_URLS
 
     custom_settings = {
@@ -55,23 +49,23 @@ class UKSpider(scrapy.Spider):
 
     def parse(self, response):
         slug = response.url.rstrip("/").split("/")[-1]
+        # Strip .aspx extension from mohre.gov.ae URLs
+        slug = slug.replace(".aspx", "")
         visa_type = _URL_VISA_MAP.get(slug, slug.replace("-", " ").title())
 
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Drop chrome — nav, header, footer, scripts, cookie banners
         for tag in soup.find_all(["nav", "header", "footer", "script", "style"]):
             tag.decompose()
         for tag in soup.find_all(class_=re.compile(r"cookie|banner|breadcrumb", re.I)):
             tag.decompose()
 
-        # Prefer <main> content, fall back to full body
         main = soup.find("main") or soup.find("div", id="content") or soup.body or soup
         text = main.get_text(separator=" ", strip=True)
         text = re.sub(r"\s{2,}", " ", text).strip()
 
         yield {
-            "country_code": "GB",
+            "country_code": "AE",
             "visa_type": visa_type,
             "content": text,
             "source_url": response.url,

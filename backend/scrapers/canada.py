@@ -13,12 +13,20 @@ from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
     "express-entry": "Express Entry",
+    "works": "Express Entry How It Works",
     "after-graduation": "Post-Graduation Work Permit",
+    "provincial-nominees": "Provincial Nominee Program",
+    "work-permit": "Temporary Work Permit",
+    "understand-pr-status": "Permanent Residence",
 }
 
 _DEFAULT_URLS = [
     "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html",
+    "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/works.html",
     "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/work/after-graduation.html",
+    "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/provincial-nominees.html",
+    "https://www.canada.ca/en/immigration-refugees-citizenship/services/work-canada/permit/temporary/work-permit.html",
+    "https://www.canada.ca/en/immigration-refugees-citizenship/services/new-immigrants/pr-card/understand-pr-status.html",
 ]
 
 

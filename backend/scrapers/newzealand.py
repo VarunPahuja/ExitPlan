@@ -1,8 +1,9 @@
 """
-UK immigration policy scraper — Scrapy spider.
+New Zealand immigration policy scraper — Scrapy spider.
 
-Scrapes gov.uk visa pages, extracts clean body text (headings, paragraphs,
-salary figures, date references), and yields one document per page.
+Source: immigration.govt.nz (Immigration New Zealand) — the official NZ government
+immigration portal. Covers Skilled Migrant, AEWV, and Straight to Residence pathways.
+Plain HTML, no Cloudflare blocking.
 """
 
 import re
@@ -12,30 +13,20 @@ import scrapy
 from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
-    "skilled-worker-visa": "Skilled Worker",
-    "graduate-visa": "Graduate Route",
-    "global-talent-visa": "Global Talent",
-    "high-potential-individual-visa": "High Potential Individual",
-    "indefinite-leave-to-remain": "Indefinite Leave to Remain",
-    "settlement-refugee-or-humanitarian-protection": "Settlement",
-    "uk-ancestry-visa": "UK Ancestry",
-    "innovator-founder-visa": "Innovator Founder",
+    "skilled-migrant-category-resident-visa": "Skilled Migrant",
+    "accredited-employer-work-visa": "Accredited Employer Work Visa",
+    "straight-to-residence-visa": "Straight to Residence",
 }
 
 _DEFAULT_URLS = [
-    "https://www.gov.uk/skilled-worker-visa",
-    "https://www.gov.uk/graduate-visa",
-    "https://www.gov.uk/global-talent-visa",
-    "https://www.gov.uk/high-potential-individual-visa",
-    "https://www.gov.uk/indefinite-leave-to-remain",
-    "https://www.gov.uk/settlement-refugee-or-humanitarian-protection",
-    "https://www.gov.uk/uk-ancestry-visa",
-    "https://www.gov.uk/innovator-founder-visa",
+    "https://www.immigration.govt.nz/new-zealand-visas/visas/visa/skilled-migrant-category-resident-visa",
+    "https://www.immigration.govt.nz/new-zealand-visas/visas/visa/accredited-employer-work-visa",
+    "https://www.immigration.govt.nz/new-zealand-visas/visas/visa/straight-to-residence-visa",
 ]
 
 
-class UKSpider(scrapy.Spider):
-    name = "uk_immigration"
+class NewZealandSpider(scrapy.Spider):
+    name = "newzealand_immigration"
     start_urls = _DEFAULT_URLS
 
     custom_settings = {
@@ -59,19 +50,17 @@ class UKSpider(scrapy.Spider):
 
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Drop chrome — nav, header, footer, scripts, cookie banners
         for tag in soup.find_all(["nav", "header", "footer", "script", "style"]):
             tag.decompose()
         for tag in soup.find_all(class_=re.compile(r"cookie|banner|breadcrumb", re.I)):
             tag.decompose()
 
-        # Prefer <main> content, fall back to full body
         main = soup.find("main") or soup.find("div", id="content") or soup.body or soup
         text = main.get_text(separator=" ", strip=True)
         text = re.sub(r"\s{2,}", " ", text).strip()
 
         yield {
-            "country_code": "GB",
+            "country_code": "NZ",
             "visa_type": visa_type,
             "content": text,
             "source_url": response.url,

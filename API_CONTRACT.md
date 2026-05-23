@@ -1,26 +1,37 @@
 # EXIT PLAN — API_CONTRACT.md
-> Locked in Week 1. Neither frontend nor backend changes this unilaterally.
-> If a change is needed: update this file first, notify both sides, then implement.
-> Last updated: Week 0 (pre-build)
+> The contract between frontend and backend. Neither side changes this unilaterally.
+> To change: update this file first, notify both sides, then implement.
+> Last updated: 2026-05-23
 
 ---
 
 ## Base URL
 
-Development: `http://localhost:8000`
-Production: `[ ADD AFTER DEPLOY ]`
+```
+Development:  http://localhost:8000
+Production:   [add after deploy]
+```
 
-All endpoints return JSON unless noted. All requests/responses use snake_case.
+All endpoints return JSON unless noted. All field names use snake_case.
 
 ---
 
 ## Authentication
 
-All protected endpoints require:
+Protected endpoints require:
 ```
 Authorization: Bearer <supabase_jwt_token>
 ```
-Public endpoints (no auth required): `/rank`, `/ask`, `/outcomes GET`
+
+| Endpoint | Auth required |
+|----------|---------------|
+| GET /health | No |
+| POST /rank/ | No |
+| GET /rank/preview | No |
+| POST /ask/ | No |
+| GET /profile/ | Yes |
+| PUT /profile/ | Yes |
+| GET /alerts/ | Yes |
 
 ---
 
@@ -28,9 +39,23 @@ Public endpoints (no auth required): `/rank`, `/ask`, `/outcomes GET`
 
 ---
 
-### POST /rank
-**Purpose:** Takes a user profile + declared priority weights, returns ranked country list + graph data.
-**Auth:** Public (no login required for first result)
+### GET /health
+**Purpose:** Confirm the API and database are reachable.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "version": "0.1.0",
+  "db": true
+}
+```
+
+---
+
+### POST /rank/
+**Purpose:** Takes a user profile + declared priority weights, returns all 10 countries ranked.
+**Auth:** Public
 
 **Request body:**
 ```json
@@ -51,10 +76,10 @@ Public endpoints (no auth required): `/rank`, `/ask`, `/outcomes GET`
 }
 ```
 
-**Notes on weights:**
-- Must sum to 1.0 (backend validates and normalises if not)
-- Weights are 100% user-declared — no backend defaults override them
-- Frontend sends whatever the user set in the drag-priority UI
+**Weights rules:**
+- Must sum to 1.0. Backend validates and normalises if they don't.
+- Weights are 100% user-declared. Backend never substitutes defaults.
+- Frontend sends whatever the user set in the drag-priority UI on step 5.
 
 **Response:**
 ```json
@@ -62,81 +87,90 @@ Public endpoints (no auth required): `/rank`, `/ask`, `/outcomes GET`
   "ranked_countries": [
     {
       "rank": 1,
-      "country_code": "DE",
-      "country_name": "Germany",
-      "total_score": 84,
+      "country_code": "IE",
+      "country_name": "Ireland",
+      "total_score": 87.2,
       "scores": {
-        "job_market": 88,
-        "pr_timeline": 79,
-        "visa_ease": 82,
-        "salary_cost_ratio": 91,
-        "language": 61
+        "job_market": 92,
+        "pr_timeline": 90,
+        "visa_ease": 85,
+        "salary_cost_ratio": 58,
+        "language": 100
       },
-      "verdict": "Germany is your strongest match — high STEM demand and a clear PR pathway within 5 years.",
-      "visa_types": ["Job Seeker Visa", "EU Blue Card", "Skilled Worker Visa"],
-      "pr_timeline_years": 5,
-      "last_updated": "2025-01-15T10:00:00Z"
+      "verdict": "Strong job market and fast PR pathway make Ireland your top match.",
+      "tier": "great",
+      "visa_types": ["Critical Skills Employment Permit", "General Employment Permit", "Stamp 4"],
+      "pr_timeline_years": 2,
+      "last_updated": "2026-05-22"
     }
   ],
   "graph_data": {
     "nodes": [
       {
-        "id": "DE",
-        "label": "Germany",
-        "total_score": 84,
+        "id": "IE",
+        "label": "Ireland",
+        "total_score": 87.2,
         "tier": "great"
       }
     ],
     "edges": [
       {
-        "source": "DE",
-        "target": "NL",
-        "similarity": 0.82,
-        "reason": "Similar EU Blue Card pathway + STEM demand"
+        "source": "IE",
+        "target": "DE",
+        "similarity": 0.96,
+        "reason": "Similar job market profiles"
       }
     ]
   },
   "profile_hash": "abc123",
-  "shareable_url": "https://exitplan.app/results/abc123"
+  "shareable_url": "http://localhost:3000/results/abc123"
 }
 ```
 
-**Tier values:** `"great"` (80-100), `"good"` (60-79), `"moderate"` (40-59), `"low"` (0-39)
+**Tier thresholds:** `"great"` (80–100) | `"good"` (60–79) | `"moderate"` (40–59) | `"low"` (0–39)
 
 ---
 
-### POST /ask
-**Purpose:** RAG query — user asks a freeform question about a country/visa for their situation.
+### GET /rank/preview
+**Purpose:** Returns a ranking with equal weights (0.20 each). No profile required.
 **Auth:** Public
-**Response type:** Server-Sent Events (streaming)
+**Response:** Same shape as POST /rank/ response.
+
+---
+
+### POST /ask/
+**Purpose:** RAG query — user asks a freeform question about a country/visa. Streams the answer via SSE.
+**Auth:** Public
+**Response type:** Server-Sent Events (text/event-stream)
 
 **Request body:**
 ```json
 {
-  "query": "Can I switch from a student visa to a work visa in Germany without leaving?",
+  "query": "Can I work part-time on a student visa in Germany?",
   "country_code": "DE",
   "user_profile": {
     "nationality": "IN",
-    "field": "computer_science",
-    "degree_level": "masters",
-    "current_status": "post_study"
+    "field": "computer_science"
   }
 }
 ```
 
-**Response (SSE stream):**
+**Response — SSE stream:**
 ```
-data: {"chunk": "Yes, in Germany you can", "done": false}
-data: {"chunk": " apply for a job seeker visa", "done": false}
-data: {"chunk": " without leaving the country", "done": false}
-data: {"chunk": "", "done": true, "citations": [{"source": "BAMF official portal", "url": "https://bamf.de/...", "date": "2024-11-01"}]}
+data: {"chunk": "Yes, you can work...", "done": false}
+data: {"chunk": " up to 120 full days or 240 half days per year", "done": false}
+data: {"chunk": " on a German student visa.", "done": false}
+data: {"chunk": "", "done": true, "citations": [{"source_url": "https://bamf.de/...", "visa_type": "Student Visa"}]}
 ```
 
-**Frontend handles:** Appending chunks as they arrive. Showing citations after `done: true`.
+**Frontend behaviour:**
+- Append each `chunk` to the displayed text as it arrives.
+- When `done: true`, render the citations list below the answer.
+- Show a typing indicator while streaming.
 
 ---
 
-### GET /profile
+### GET /profile/
 **Purpose:** Get the logged-in user's saved profile.
 **Auth:** Required
 
@@ -159,27 +193,48 @@ data: {"chunk": "", "done": true, "citations": [{"source": "BAMF official portal
     "language": 0.08
   },
   "saved_countries": ["DE", "CA", "NL"],
-  "created_at": "2025-01-01T00:00:00Z"
+  "created_at": "2026-01-01T00:00:00Z"
 }
 ```
 
+**Error if not found:** 404 with `PROFILE_NOT_FOUND`
+
 ---
 
-### PUT /profile
-**Purpose:** Create or update the logged-in user's profile.
+### PUT /profile/
+**Purpose:** Create or update the logged-in user's profile. Email is taken from the JWT — do not send it in the body.
 **Auth:** Required
 
-**Request body:** Same shape as GET /profile response (minus id, email, created_at)
+**Request body:**
+```json
+{
+  "nationality": "IN",
+  "current_status": "post_study",
+  "field": "computer_science",
+  "degree_level": "masters",
+  "savings_range": "5_15L",
+  "career_goal": "long_term_pr",
+  "weights": {
+    "job_market": 0.35,
+    "pr_timeline": 0.30,
+    "visa_ease": 0.15,
+    "salary_cost_ratio": 0.12,
+    "language": 0.08
+  },
+  "saved_countries": ["DE", "CA", "NL"]
+}
+```
 
-**Response:** Updated profile object
+**Response:** Updated profile object (same shape as GET /profile/ response).
 
 ---
 
-### GET /alerts
+### GET /alerts/
 **Purpose:** Get alert history for the logged-in user.
 **Auth:** Required
+**Status:** STUB — returns empty list. Full implementation pending.
 
-**Response:**
+**Response (target shape):**
 ```json
 {
   "alerts": [
@@ -188,9 +243,9 @@ data: {"chunk": "", "done": true, "citations": [{"source": "BAMF official portal
       "country_code": "GB",
       "country_name": "United Kingdom",
       "alert_type": "policy_change",
-      "message": "UK changed Graduate Route salary threshold from £26,200 to £38,700. This affects your saved Plan B.",
-      "plain_english": "The minimum salary you need to stay in the UK after graduating just went up significantly. If you were planning on the Graduate Route, your job search target has changed.",
-      "sent_at": "2025-01-10T09:00:00Z",
+      "message": "UK changed Graduate Route salary threshold from £26,200 to £38,700.",
+      "plain_english": "The minimum salary you need to stay in the UK after graduating just went up significantly.",
+      "sent_at": "2026-01-10T09:00:00Z",
       "read_at": null,
       "source_url": "https://gov.uk/..."
     }
@@ -200,65 +255,27 @@ data: {"chunk": "", "done": true, "citations": [{"source": "BAMF official portal
 
 ---
 
-### PUT /alerts/preferences
-**Purpose:** Update alert preferences.
-**Auth:** Required
-
-**Request body:**
-```json
-{
-  "email_alerts": true,
-  "watched_countries": ["DE", "CA", "GB"],
-  "alert_types": ["policy_change", "visa_quota", "salary_threshold"]
-}
-```
-
----
-
-### GET /outcomes
-**Purpose:** Get anonymized community outcome stories.
-**Auth:** Public
-
-**Query params:** `?country=DE&field=computer_science&degree=masters`
-
-**Response:**
-```json
-{
-  "outcomes": [
-    {
-      "id": "uuid",
-      "nationality": "IN",
-      "field": "Computer Science",
-      "degree_level": "Masters",
-      "destination_country": "DE",
-      "visa_type": "Job Seeker Visa",
-      "months_to_job": 4,
-      "summary": "Got a backend engineering role at a Berlin startup. Needed B1 German for some roles but found English-only positions.",
-      "year": 2024,
-      "verified": true
-    }
-  ]
-}
-```
-
-### POST /outcomes
-**Purpose:** Submit a community outcome story.
-**Auth:** Required
-
----
-
 ## ENUM VALUES
 
-Use these exact strings — frontend and backend must match.
+Frontend and backend must use these exact strings. No variations.
 
 ```
 current_status:   "student" | "post_study" | "employed"
+
 degree_level:     "bachelors" | "masters" | "phd" | "diploma"
+
 savings_range:    "0_5L" | "5_15L" | "15L_plus"
+
 career_goal:      "long_term_pr" | "work_experience" | "return_home"
-country_codes:    "GB" | "CA" | "DE" | "AU" | "NL" | "PT" | "IE" | "AE" | "NZ" | "SG"
-alert_types:      "policy_change" | "visa_quota" | "salary_threshold" | "pr_requirement"
+
+field:            "computer_science" | "data_science" | "engineering" |
+                  "business" | "medicine" | "law" | "design" | "finance" | "other"
+
 tier:             "great" | "good" | "moderate" | "low"
+
+country_codes:    "GB" | "CA" | "DE" | "AU" | "NL" | "PT" | "IE" | "AE" | "NZ" | "SG"
+
+alert_types:      "policy_change" | "visa_quota" | "salary_threshold" | "pr_requirement"
 ```
 
 ---
@@ -276,10 +293,18 @@ All errors return:
 }
 ```
 
+Common error codes:
+- `PROFILE_NOT_FOUND` — 404, GET /profile/ when user has no saved profile
+- `UNAUTHORIZED` — 401, missing or invalid Bearer token
+- `VALIDATION_ERROR` — 422, request body fails Pydantic validation
+- `WEIGHTS_DO_NOT_SUM` — 422, weights sum is too far from 1.0 to normalise
+- `COUNTRY_NOT_FOUND` — 404, unknown country_code in /ask request
+
 ---
 
 ## CHANGE LOG
 
-| Date | Change | Who approved |
-|------|--------|-------------|
-| Week 0 | Initial contract defined | — |
+| Date | Change | Who |
+|------|--------|-----|
+| 2026-05-23 | Full rewrite to reflect actual built state; added /rank/preview, field enum, SSE citations format | Varun |
+| Week 1 | Initial contract defined | Varun |

@@ -37,6 +37,38 @@ def embed(texts: list[str]) -> list[list[float]]:
     return _model.encode(texts).tolist()
 
 
+def is_relevant_chunk(text: str) -> bool:
+    """
+    Return True only if this chunk contains information useful
+    to an international student making immigration decisions.
+    Filter out purely administrative/legal boilerplate.
+    """
+    text_lower = text.lower()
+
+    relevant_terms = [
+        "visa", "permit", "salary", "wage", "pr ", "permanent",
+        "residency", "work", "employ", "skill", "qualify",
+        "application", "eligible", "require", "threshold",
+        "language", "english", "sponsor", "job", "graduate",
+        "student", "degree", "qualification", "pathway",
+        "timeline", "months", "years", "citizenship", "settle",
+        "blue card", "express entry", "points", "score",
+    ]
+
+    has_relevant = any(term in text_lower for term in relevant_terms)
+
+    admin_indicators = [
+        "table of contents", "footnote", "bundesgesetzblatt",
+        "official journal", "whereas the council",
+        "having regard to the treaty",
+        "annex to this ordinance",
+        "impressum", "datenschutz",
+    ]
+    is_admin = sum(1 for ind in admin_indicators if ind in text_lower) >= 2
+
+    return has_relevant and not is_admin
+
+
 async def embed_and_store(
     docs: list[dict],
     use_string_format: bool = True,
@@ -69,10 +101,20 @@ async def embed_and_store(
         if not chunks:
             continue
 
-        vectors = embed(chunks)
+        filtered: list[str] = []
+        for c in chunks:
+            if is_relevant_chunk(c):
+                filtered.append(c)
+            else:
+                print("  [SKIP] irrelevant chunk")
+
+        if not filtered:
+            continue
+
+        vectors = embed(filtered)
         ok = 0
 
-        for chunk, vector in zip(chunks, vectors):
+        for chunk, vector in zip(filtered, vectors):
             embedding_value = (
                 "[" + ",".join(f"{v:.8f}" for v in vector) + "]"
                 if use_string_format
@@ -97,6 +139,6 @@ async def embed_and_store(
                 print(f"  [error] {e} | {chunk[:50]!r}")
 
         total += ok
-        print(f"  [{code}] {doc['visa_type']:<35} {ok:>4}/{len(chunks)} chunks stored")
+        print(f"  [{code}] {doc['visa_type']:<35} {ok:>4}/{len(filtered)} chunks stored")
 
     return total

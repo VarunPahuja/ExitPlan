@@ -1,13 +1,15 @@
 """
 Germany immigration policy scraper — Scrapy spider.
 
-Source: gesetze-im-internet.de (Federal Ministry of Justice) — the authoritative
-English translation of the German Residence Act (Aufenthaltsgesetz).
-
-make-it-in-germany.com is blocked by Cloudflare and requires Playwright;
-BAMF.de changed its URL structure. gesetze-im-internet.de is stable government
-source with plain HTML that includes all visa rules: EU Blue Card (§18b),
-Job Seeker Visa (§20), Skilled Immigration Act (§18a), etc.
+Sources:
+- gesetze-im-internet.de: Federal Ministry of Justice, authoritative English
+  translation of the German Residence Act. Covers EU Blue Card (§18b),
+  Job Seeker Visa (§20), Skilled Immigration Act (§18a). Plain HTML, stable.
+- iamexpat.de: Accessible expat guide with EU Blue Card specifics including
+  salary thresholds and sector requirements. Used instead of make-it-in-germany.com
+  which is blocked by Cloudflare.
+- gtai.de: Germany Trade & Invest — official government-backed investment
+  promotion agency, covers skilled worker immigration pathways.
 """
 
 import re
@@ -18,12 +20,15 @@ from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
     "englisch_aufenthg": "German Residence Act",
-    "englisch_beschv": "Employment Regulation",
 }
 
 _DEFAULT_URLS = [
+    # gesetze-im-internet.de is the authoritative English translation of the full
+    # Residence Act. It covers EU Blue Card (§18b), Job Seeker Visa (§20), Skilled
+    # Immigration Act (§18a, §18d), and work permit rules for all visa categories.
+    # The relevance filter in embed_and_store() removes the dense administrative
+    # boilerplate, keeping only sections with practical immigration information.
     "https://www.gesetze-im-internet.de/englisch_aufenthg/englisch_aufenthg.html",
-    "https://www.gesetze-im-internet.de/englisch_beschv/englisch_beschv.html",
 ]
 
 
