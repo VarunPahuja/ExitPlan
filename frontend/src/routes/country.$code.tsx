@@ -52,6 +52,94 @@ type RankedCountry = {
   tier: "great" | "good" | "moderate" | "low";
 };
 
+type PathwayStep = { year: string; title: string; desc: string };
+type PathwayInfo = { steps: PathwayStep[]; note: string };
+
+// ——— PR Pathway data ———
+
+const PATHWAY_INFO: Record<string, PathwayInfo> = {
+  IE: {
+    steps: [
+      { year: "Year 0", title: "Critical Skills EP", desc: "Arrive on Critical Skills Employment Permit. Register with GNIB within 90 days." },
+      { year: "Year 2", title: "Stamp 4 eligible", desc: "Apply to Irish Immigration Service for Stamp 4 permission. No longer need employment permit." },
+      { year: "Year 5", title: "Long-term residency", desc: "Apply for Long-Term Residency or Irish citizenship after 5 years lawful residence." },
+    ],
+    note: "Critical Skills EP holders can apply for Stamp 4 after 2 years — one of the fastest paths in Europe.",
+  },
+  DE: {
+    steps: [
+      { year: "Year 0", title: "EU Blue Card / Work Visa", desc: "Arrive on EU Blue Card or skilled worker visa. Salary must meet threshold (€45,300+ for Blue Card in 2026)." },
+      { year: "Year 2", title: "Niederlassungserlaubnis eligible", desc: "EU Blue Card holders with B1 German can apply for permanent settlement permit after 21 months." },
+      { year: "Year 3", title: "PR confirmed", desc: "Without B1 German, standard Blue Card route takes 27 months. Skilled workers without Blue Card need 4 years." },
+    ],
+    note: "Germany has one of the fastest EU Blue Card → PR routes if you have B1 German language skills.",
+  },
+  CA: {
+    steps: [
+      { year: "Year 0", title: "PGWP / Work permit", desc: "Graduate with Post-Graduation Work Permit (up to 3 years). Begin building Canadian work experience." },
+      { year: "Year 1", title: "Express Entry eligible", desc: "After 1 year Canadian Experience Class work, submit Express Entry profile. Average processing: 7 months." },
+      { year: "Year 2", title: "PR granted", desc: "Total timeline from graduation to PR: typically 14–20 months for strong CEC profiles." },
+    ],
+    note: "Canada offers the most direct student-to-PR pathway globally via the Post-Graduation Work Permit + Express Entry.",
+  },
+  GB: {
+    steps: [
+      { year: "Year 0", title: "Graduate Route", desc: "2 years (3 for PhD) to work freely without sponsorship. Use this time to find a Skilled Worker sponsor." },
+      { year: "Year 1", title: "Skilled Worker Visa", desc: "Secure sponsorship. Salary must meet £41,700 minimum (or occupation going rate). Switch before Graduate Route expires." },
+      { year: "Year 5", title: "ILR eligible", desc: "After 5 continuous years on Skilled Worker. Note: 10-year route proposed in 2025 white paper — check current rules." },
+    ],
+    note: "UK route is long (5 years to ILR) and under reform. Salary thresholds rose to £41,700 in July 2025.",
+  },
+  AU: {
+    steps: [
+      { year: "Year 0", title: "Graduate visa (485)", desc: "2–4 years post-study work rights. Build points-eligible skilled work experience in Australia." },
+      { year: "Year 1–2", title: "Skills assessment", desc: "Get skills assessed by relevant authority (e.g. Engineers Australia, ACS for IT). Submit EOI in SkillSelect." },
+      { year: "Year 3–4", title: "PR granted", desc: "Subclass 189 (independent) or 190 (state nominated) PR typically granted 6–12 months after invitation." },
+    ],
+    note: "Australia's points-based system rewards Australian work experience — the 485 Graduate visa is your entry point.",
+  },
+  NL: {
+    steps: [
+      { year: "Year 0", title: "Kennismigrant permit", desc: "Highly Skilled Migrant permit processed in 2–4 weeks. Salary must meet threshold (€5,942/month for 30+ in 2026)." },
+      { year: "Year 2", title: "30% ruling period", desc: "Enjoy 30% tax-free benefit for up to 5 years. Start A2 Dutch language course for future PR requirement." },
+      { year: "Year 5", title: "PR eligible", desc: "Apply for permanent residence after 5 years. Requires passing civic integration exam (A2 Dutch) and income at threshold." },
+    ],
+    note: "Netherlands requires A2 Dutch for PR. Start language classes early — it takes most people 12–18 months.",
+  },
+  PT: {
+    steps: [
+      { year: "Year 0", title: "D3 / D8 visa", desc: "Arrive on Tech Visa (D3) or Digital Nomad (D8). Register with AIMA within 4 months of arrival." },
+      { year: "Year 2", title: "Temporary residence", desc: "Renew residence permit. AIMA backlogs have caused delays — apply early. NHR 2.0 tax regime available." },
+      { year: "Year 5", title: "PR eligible", desc: "Apply for permanent residence after 5 years. Requires A2 Portuguese language proof." },
+    ],
+    note: "Portugal is accessible but AIMA (formerly SEF) backlogs are real. Budget extra time for bureaucracy.",
+  },
+  AE: {
+    steps: [
+      { year: "Year 0", title: "Employment Visa", desc: "Employer-sponsored visa tied to your employer. Valid 2 years, renewable. Must transfer if changing jobs." },
+      { year: "Year 2", title: "Golden Visa eligible", desc: "If salary exceeds AED 30,000/month basic, apply for 10-year Golden Visa. Employer-independent." },
+      { year: "Year 10+", title: "Long-term residency", desc: "Golden Visa renews every 10 years. Note: UAE does not offer traditional permanent residency or citizenship for most expats." },
+    ],
+    note: "UAE has no traditional PR path. Golden Visa is long-term residency (10 years renewable) — not permanent in the legal sense.",
+  },
+  NZ: {
+    steps: [
+      { year: "Year 0", title: "AEWV or Green List", desc: "Accredited Employer Work Visa for most roles. Green List Tier 1 occupations (engineers, doctors) get Straight to Residence." },
+      { year: "Year 2", title: "Skilled Migrant application", desc: "Build points: NZ work experience, qualifications, job offer. Minimum 6 points needed (simplified Oct 2023 system)." },
+      { year: "Year 3", title: "PR granted", desc: "Skilled Migrant resident visa processing typically 40–124 days after selection. Among fastest points-based PR systems." },
+    ],
+    note: "New Zealand's Green List Tier 1 gives engineers and healthcare professionals direct PR — no wait required.",
+  },
+  SG: {
+    steps: [
+      { year: "Year 0", title: "Employment Pass", desc: "EP requires S$5,600/month minimum (S$6,200 for finance) as of 2026. COMPASS points assessment applies." },
+      { year: "Year 2", title: "PR application", desc: "Apply to ICA for PR after ~2 years stable employment. No fixed timeline — ICA decision is discretionary." },
+      { year: "Year 3–5", title: "PR outcome", desc: "Processing takes 6–12 months. Approval is not guaranteed. If rejected, can reapply after 6 months. ~35–40k PRs granted annually." },
+    ],
+    note: "Singapore PR is discretionary — there is no guaranteed pathway. Strong salary, continuous employment, and tax contributions improve chances.",
+  },
+};
+
 // ——— Helpers ———
 
 function barColor(s: number) {
@@ -68,6 +156,14 @@ function formatDate(iso: string) {
   } catch {
     return iso;
   }
+}
+
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,3}\s+/gm, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .trim();
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
@@ -194,7 +290,7 @@ function CountryDetail() {
             </div>
           ) : null}
 
-          {/* Key facts — always visible once loaded */}
+          {/* Key facts */}
           {!loading && !error && detail && detail.key_facts.length > 0 && (
             <KeyFacts facts={detail.key_facts} />
           )}
@@ -222,28 +318,17 @@ function TabContent({
   localCountry: RankedCountry | null;
 }) {
   switch (tab) {
-    case "Overview":
-      return <OverviewTab detail={detail} staticCountry={staticCountry} />;
-    case "Visa Types":
-      return <VisaTypesTab detail={detail} />;
-    case "PR Pathway":
-      return <PRPathwayTab detail={detail} />;
-    case "Job Market":
-      return <JobMarketTab detail={detail} localCountry={localCountry} />;
-    case "Recent Changes":
-      return <RecentChangesTab detail={detail} />;
+    case "Overview":      return <OverviewTab detail={detail} staticCountry={staticCountry} />;
+    case "Visa Types":    return <VisaTypesTab detail={detail} />;
+    case "PR Pathway":    return <PRPathwayTab detail={detail} />;
+    case "Job Market":    return <JobMarketTab detail={detail} localCountry={localCountry} />;
+    case "Recent Changes":return <RecentChangesTab detail={detail} />;
   }
 }
 
 // ——— Individual tabs ———
 
-function OverviewTab({
-  detail,
-  staticCountry,
-}: {
-  detail: CountryDetail;
-  staticCountry: Country | undefined;
-}) {
+function OverviewTab({ detail, staticCountry }: { detail: CountryDetail; staticCountry: Country | undefined }) {
   return (
     <div>
       <h2 className="font-display text-xl font-bold">Overview</h2>
@@ -289,35 +374,36 @@ function VisaTypesTab({ detail }: { detail: CountryDetail }) {
 }
 
 function PRPathwayTab({ detail }: { detail: CountryDetail }) {
-  const years = detail.pr_timeline_years;
-  const mid = Math.ceil(years / 2);
-
-  const milestones = [
-    { label: "Year 0", desc: "Arrive on work visa · begin employment" },
-    { label: `Year ${mid}`, desc: "Mid-point check · maintain continuous employment and residency" },
-    { label: `Year ${years}`, desc: "PR eligible · apply for permanent residence" },
-  ];
+  const pathway: PathwayInfo = PATHWAY_INFO[detail.code.toUpperCase()] ?? {
+    steps: [
+      { year: "Year 0", title: "Arrive on work visa", desc: "Begin employment on appropriate work visa for your field." },
+      { year: `Year ${Math.ceil(detail.pr_timeline_years / 2)}`, title: "Mid-point", desc: "Maintain continuous employment and residency requirements." },
+      { year: `Year ${detail.pr_timeline_years}`, title: "PR eligible", desc: "Apply for permanent residence after meeting all requirements." },
+    ],
+    note: `Timeline based on ${detail.pr_timeline_years} years continuous employment.`,
+  };
 
   return (
     <div>
       <h2 className="font-display text-xl font-bold">PR Pathway</h2>
       <div className="mt-2">
         <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
-          ~{years} year{years !== 1 ? "s" : ""} to PR
+          ~{detail.pr_timeline_years} year{detail.pr_timeline_years !== 1 ? "s" : ""} to PR
         </span>
       </div>
       <div className="relative mt-8 pl-7">
         <div className="absolute left-2.5 top-2 bottom-2 w-0.5 bg-border" />
-        {milestones.map((m, i) => (
+        {pathway.steps.map((m, i) => (
           <div key={i} className="relative mb-8">
             <div className="absolute -left-[22px] top-0.5 h-4 w-4 rounded-full border-2 border-primary bg-background" />
-            <p className="font-display text-sm font-bold">{m.label}</p>
+            <p className="font-display text-xs font-semibold uppercase tracking-wider text-primary/60">{m.year}</p>
+            <p className="mt-0.5 font-display text-sm font-bold">{m.title}</p>
             <p className="mt-1 text-sm text-muted-foreground">{m.desc}</p>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-xs italic text-muted-foreground">
-        Timeline based on continuous employment and uninterrupted residency. Individual circumstances vary.
+      <p className="mt-2 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm leading-relaxed text-amber-800">
+        {pathway.note}
       </p>
     </div>
   );
@@ -331,12 +417,7 @@ const FACTOR_LABELS = [
   { key: "language", label: "Language" },
 ];
 
-function JobMarketTab({
-  localCountry,
-}: {
-  detail: CountryDetail;
-  localCountry: RankedCountry | null;
-}) {
+function JobMarketTab({ localCountry }: { detail: CountryDetail; localCountry: RankedCountry | null }) {
   if (!localCountry) {
     return (
       <div>
@@ -348,7 +429,7 @@ function JobMarketTab({
           to="/profile"
           className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
         >
-          Build profile <ArrowLeft className="h-4 w-4 rotate-180" />
+          Build profile →
         </Link>
       </div>
     );
@@ -392,7 +473,7 @@ function RecentChangesTab({ detail }: { detail: CountryDetail }) {
       <div className="mt-4 space-y-4">
         {detail.recent_changes.map((c) => (
           <div key={c.id} className="rounded-xl border border-border bg-background p-4">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
                 {c.visa_type}
               </span>
@@ -422,7 +503,7 @@ function RecentChangesTab({ detail }: { detail: CountryDetail }) {
   );
 }
 
-// ——— Key facts section ———
+// ——— Key facts ———
 
 function KeyFacts({ facts }: { facts: CountryDetail["key_facts"] }) {
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
@@ -475,9 +556,9 @@ function KeyFacts({ facts }: { facts: CountryDetail["key_facts"] }) {
   );
 }
 
-// ——— Chat panel (unchanged from original) ———
+// ——— Chat panel ———
 
-type Msg = { role: "user" | "assistant"; text: string };
+type Msg = { role: "user" | "assistant"; text: string; citations?: string[] };
 
 function ChatPanel({ countryName, countryCode }: { countryName: string; countryCode: string }) {
   const [input, setInput] = useState("");
@@ -497,6 +578,14 @@ function ChatPanel({ countryName, countryCode }: { countryName: string; countryC
       return updated;
     });
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const setCitationsOnLast = (urls: string[]) => {
+    setMsgs((m) => {
+      const updated = [...m];
+      updated[updated.length - 1] = { ...updated[updated.length - 1], citations: urls };
+      return updated;
+    });
   };
 
   const send = async (e: React.FormEvent) => {
@@ -528,12 +617,13 @@ function ChatPanel({ countryName, countryCode }: { countryName: string; countryC
           try {
             const data = JSON.parse(line.slice(6));
             if (!data.done && data.chunk) appendToLast(data.chunk);
-            if (data.done && data.citations?.length) {
-              const sources = (data.citations as { source_url: string }[])
+            if (data.done) {
+              const urls = ((data.citations ?? []) as { source_url: string }[])
                 .map((c) => c.source_url)
                 .filter(Boolean)
-                .join(" · ");
-              if (sources) appendToLast(`\n\nSources: ${sources}`);
+                .filter((u, i, arr) => arr.indexOf(u) === i) // deduplicate
+                .slice(0, 2);
+              if (urls.length > 0) setCitationsOnLast(urls);
             }
           } catch {
             // skip malformed SSE line
@@ -552,27 +642,51 @@ function ChatPanel({ countryName, countryCode }: { countryName: string; countryC
       <div className="border-b border-border bg-background/50 px-5 py-4">
         <h3 className="font-display text-base font-semibold">Ask AI about {countryName}</h3>
       </div>
+
       <div className="flex-1 space-y-3 overflow-y-auto p-5">
         {msgs.map((m, i) => (
           <div
             key={i}
             className={cn(
-              "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
+              "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
               m.role === "assistant"
                 ? "bg-accent text-accent-foreground"
                 : "ml-auto bg-primary text-primary-foreground",
             )}
           >
-            {m.text}
+            {/* Message text — markdown stripped, whitespace preserved */}
+            <p className="whitespace-pre-wrap">{stripMarkdown(m.text)}</p>
+
+            {/* Thinking indicator */}
             {streaming && i === msgs.length - 1 && m.role === "assistant" && !m.text && (
               <span className="inline-flex items-center gap-1 text-xs opacity-60">
                 <Loader2 className="h-3 w-3 animate-spin" /> Thinking…
               </span>
             )}
+
+            {/* Citation links */}
+            {m.citations && m.citations.length > 0 && (
+              <div className="mt-2 border-t border-current/10 pt-2">
+                <p className="text-[11px] font-semibold opacity-60">Sources</p>
+                {m.citations.map((url) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-0.5 flex items-center gap-1 text-[11px] opacity-70 hover:opacity-100 underline truncate"
+                  >
+                    <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                    {url}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
+
       <form onSubmit={send} className="flex items-center gap-2 border-t border-border bg-background p-3">
         <input
           value={input}

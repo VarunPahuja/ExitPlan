@@ -242,20 +242,14 @@ async def ask(
     context = "\n\n".join(context_parts)
 
     prompt = (
-        f"You are helping someone understand immigration rules.\n\n"
-        f"User profile: {user_profile}\n\n"
-        f"Below are excerpts from official government immigration "
-        f"documents. Read them carefully — they may use legal language "
-        f"but contain the answer:\n\n"
-        f"{context}\n\n"
+        f"Answer this immigration question concisely.\n\n"
+        f"Country: {country_code}\n"
+        f"User: {user_profile}\n\n"
+        f"Policy context (from official sources):\n{context}\n\n"
         f"Question: {query}\n\n"
-        f"Instructions:\n"
-        f"- If the answer is in the documents (even in legal language), "
-        f"extract and explain it in plain English\n"
-        f"- Include specific figures, thresholds, or requirements "
-        f"mentioned in the text\n"
-        f"- Cite which source document you found the information in\n"
-        f"- If the information is genuinely not present, say so clearly"
+        f"Answer in 2-3 short paragraphs. Plain English only. "
+        f"No headers or bullet points. Under 150 words total. "
+        f"End with: Source: [most relevant URL from context]"
     )
 
     async for chunk in llm.generate(prompt, context):

@@ -39,12 +39,13 @@ export function Navbar() {
             Dashboard
           </Link>
           {initial ? (
-            <div
+            <Link
+              to="/account"
               title={email ?? ""}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-display text-sm font-semibold"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-display text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               {initial}
-            </div>
+            </Link>
           ) : (
             <Link to="/signin">
               <Button
