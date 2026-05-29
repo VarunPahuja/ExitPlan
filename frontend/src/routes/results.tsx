@@ -77,7 +77,8 @@ function Results() {
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const url = data?.shareable_url || window.location.href;
+      await navigator.clipboard.writeText(url);
       toast.success("Copied!");
     } catch {
       toast.error("Couldn't copy");
