@@ -14,7 +14,7 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import rank, ask, profile, alerts, outcomes
+from routers import rank, ask, profile, alerts, outcomes, countries
 from db.client import test_connection
 
 app = FastAPI(
@@ -40,6 +40,7 @@ app.include_router(ask.router,      prefix="/ask",      tags=["ask"])
 app.include_router(profile.router,  prefix="/profile",  tags=["profile"])
 app.include_router(alerts.router,   prefix="/alerts",   tags=["alerts"])
 app.include_router(outcomes.router, prefix="/outcomes", tags=["outcomes"])
+app.include_router(countries.router, prefix="/country", tags=["countries"])
 
 
 @app.get("/health", tags=["meta"])

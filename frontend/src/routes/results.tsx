@@ -338,11 +338,12 @@ function KnowledgeMap({ graph }: { graph: { nodes: GraphNode[]; edges: GraphEdge
       .style("opacity", 0)
       .style("transition", "opacity 0.15s");
 
-    const tierColor = (t: Tier) =>
-      ({ great: "#22C55E", good: "#5B4FE8", moderate: "#F59E0B", low: "#9CA3AF" }[t] || "#9CA3AF");
+    const colorScale = d3.scaleLinear()
+      .domain([55, 70, 80, 90])
+      .range(["#F59E0B", "#5B4FE8", "#22C55E", "#059669"])
+      .clamp(true);
 
-    const scoreExtent = d3.extent(graph.nodes, (n: GraphNode) => n.total_score) as [number, number];
-    const r = d3.scaleLinear().domain(scoreExtent[0] === scoreExtent[1] ? [0, scoreExtent[1]] : scoreExtent).range([20, 40]);
+    const r = d3.scaleLinear().domain([55, 90]).range([18, 42]).clamp(true);
 
     const nodes = graph.nodes.map((n) => ({ ...n }));
     const links = (graph.edges || []).map((e) => ({ ...e }));
@@ -386,7 +387,7 @@ function KnowledgeMap({ graph }: { graph: { nodes: GraphNode[]; edges: GraphEdge
     node
       .append("circle")
       .attr("r", (d: any) => r(d.total_score))
-      .attr("fill", (d: any) => tierColor(d.tier))
+      .attr("fill", (d: any) => colorScale(d.total_score))
       .attr("stroke", "white")
       .attr("stroke-width", 3);
 
@@ -453,6 +454,11 @@ function KnowledgeMap({ graph }: { graph: { nodes: GraphNode[]; edges: GraphEdge
           <p className="text-sm text-black/45">Generating your map…</p>
         </div>
       )}
+      <div className="absolute bottom-4 left-4 flex items-center gap-4 text-xs font-semibold text-black/60 pointer-events-none">
+        <span className="flex items-center gap-1"><span style={{ color: "#059669" }}>●</span> Top match</span>
+        <span className="flex items-center gap-1"><span style={{ color: "#22C55E" }}>●</span> Good</span>
+        <span className="flex items-center gap-1"><span style={{ color: "#F59E0B" }}>●</span> Moderate</span>
+      </div>
     </div>
   );
 }

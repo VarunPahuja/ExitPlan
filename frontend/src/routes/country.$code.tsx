@@ -15,7 +15,13 @@ type Tab = (typeof TABS)[number];
 
 function CountryDetail() {
   const { code } = Route.useParams();
-  const country = COUNTRIES.find((c) => c.code === code) ?? COUNTRIES[0];
+  const country = COUNTRIES.find((c) => c.code === code.toUpperCase()) ?? {
+    code,
+    name: code,
+    flag: "🌍",
+    scores: { job: 70, pr: 70, visa: 70, salary: 70, language: 70 },
+    verdict: "Detailed information coming soon.",
+  };
   const [tab, setTab] = useState<Tab>("Overview");
 
   return (

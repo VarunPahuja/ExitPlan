@@ -15,7 +15,8 @@
       "Bash(grep -rn \"localhost:8000\" src/ --include=\"*.ts\" --include=\"*.tsx\")",
       "Bash(grep -rn \"eyJhbGci\\\\|supabase\\\\.co\\\\|service_role\" src/)",
       "Bash(ls .lovable)",
-      "Bash(python -c \"import json; d=json.load\\(open\\('package.json'\\)\\); print\\('name:', d['name']\\); print\\('lovable deps:', [k for k in {**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)} if 'lovable' in k]\\)\")"
+      "Bash(python -c \"import json; d=json.load\\(open\\('package.json'\\)\\); print\\('name:', d['name']\\); print\\('lovable deps:', [k for k in {**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)} if 'lovable' in k]\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

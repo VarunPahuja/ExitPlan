@@ -38,11 +38,15 @@
 | Manual curated docs | ✅ Done | scrapers/md_ingest.py parses curated_immigration_data.md (SG, NL, CA, GB detailed briefs) into structured docs |
 | Ingest pipeline | ✅ Done | ingest.py: Phase 1a (scrapers) + Phase 1b (manual docs) + Phase 2 (embed + store) |
 | Policy chunks in DB | ✅ Done | DE=216, NZ=30, AU=28, PT=28, AE=24, IE=13, GB=12+manual, CA=8+manual, SG=2+manual, NL=1+manual |
-| /alerts endpoint | 🟡 Stub | GET /alerts/ returns stub response; CRUD not implemented |
-| Change detector | ❌ Not built | services/change_detector.py is a stub file |
-| Resend email alerts | ❌ Not built | services/alert_engine.py is a stub file |
-| Celery workers | ❌ Not built | workers/celery_app.py is a stub file |
+| /alerts endpoint | ✅ Done | GET /alerts/, GET/PUT /alerts/preferences, POST /alerts/mark-read/{id}; all auth-gated, real DB queries |
+| /country endpoint | ✅ Done | GET /country/{code}; returns scores, visa_types, pr_timeline_years, recent_changes, key_facts |
+| Change detector | ✅ Done | services/change_detector.py: detect_changes(), store_change(), get_affected_users() |
+| Resend email alerts | ✅ Done | services/alert_engine.py: send_alert() + process_changes(); graceful no-op if RESEND_API_KEY missing |
+| ingest_and_alert pipeline | ✅ Done | services/ingest_and_alert.py: scrape → diff → alert → embed |
+| Celery workers | 🟡 Partial | tasks wired to run_ingest_and_alert(); requires Redis broker (UPSTASH_REDIS_URL) to run |
 | Upstash Redis | ❌ Not built | Not blocking anything currently |
+| /outcomes endpoint | ✅ Done | GET / (paginated, filterable by country + field), GET /{id}, POST / (auth required) |
+| Outcome stories | ✅ Done | 10 real stories seeded via backend/seed_outcomes.py |
 | Lovable — landing page | 🟡 Built | Editorial design complete; needs hero image swap |
 | Lovable — profile builder | ✅ Done | 5-step form, all steps working; drag priority UI on step 5; POSTs to /rank on submit |
 | Lovable — results page | ❌ Hardcoded | Page exists but renders hardcoded data; must read from localStorage "exitplan_results" and render real API response |
@@ -55,7 +59,7 @@
 
 ## 3. ACTIVE TASK
 
-**What is being worked on right now:** None.
+**What is being worked on right now:** None. All backend priorities 1-7 completed 2026-05-29.
 
 > RULE: Only one active task at a time across all agents. Before starting, update this section. After completing, mark it done in section 2.
 
@@ -69,22 +73,14 @@ None.
 
 ## 5. NEXT TASK QUEUE (priority order)
 
-### Backend must-haves (before launch)
-1. `/alerts` endpoint — full CRUD: GET list, POST subscribe to country, DELETE unsubscribe, PUT preferences (Claude Code)
-2. Change detector — diff new scrape against stored chunks, write to policy_changes table when delta detected (Claude Code)
-3. Resend email — trigger email via Resend API when change_detector writes a new policy_change (Claude Code)
-
 ### Frontend must-haves (before launch)
-4. Results page — read from localStorage `"exitplan_results"`, render real ranked cards with animated score count-up and factor bars (Lovable — use prompt from PROMPTS.md Section 3)
-5. Knowledge graph — D3.js force simulation using graph_data from /rank response; click node highlights corresponding country card (Lovable — use prompt from PROMPTS.md Section 3)
-6. Sign in page — Google OAuth via Supabase Auth; redirect to /profile after sign-in (Lovable — use prompt from PROMPTS.md Section 3)
+1. Country detail page — tab content is still hardcoded placeholder text; wire to GET /country/{code} to show real scores, recent_changes, key_facts
+2. Dashboard page — hardcoded static data; wire to GET /alerts/ + add real profile summary
+3. Sign in page — Google OAuth via Supabase Auth; redirect to /profile after sign-in
 
 ### Nice-to-have (post-launch)
-7. Wire AI chat page to /ask endpoint
-8. Wire alert dashboard to /alerts endpoint
-9. Celery scheduled scraping (replace manual run)
-10. Upstash Redis caching for /rank responses
-11. Outcome stories — manual seed from Reddit/forums
+4. Celery scheduled scraping — requires UPSTASH_REDIS_URL env var, tasks are wired and ready
+5. Upstash Redis caching for /rank responses
 
 ---
 
