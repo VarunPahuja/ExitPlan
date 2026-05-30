@@ -1,15 +1,17 @@
 """
-Sentence-transformers embedding pipeline.
+Gemini embedding pipeline via REST API.
 
-Model is loaded once at module level and kept in memory for the process
-lifetime — avoids a ~1s reload penalty on every call.
+Uses text-embedding-004 (768 dimensions) through the Gemini REST API with
+httpx — same approach as llm.py. No local model weights, zero RAM overhead.
 """
 
+import os
 from datetime import date
 
-from sentence_transformers import SentenceTransformer
+import httpx
 
-_model = SentenceTransformer("all-MiniLM-L6-v2")
+_API_KEY = os.getenv("GEMINI_API_KEY", "")
+_EMBED_MODEL = "gemini-embedding-001"
 
 
 def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
@@ -32,9 +34,32 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
     return chunks
 
 
+def _embed_one(text: str) -> list[float]:
+    """Call the Gemini embedContent REST endpoint for a single text."""
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models"
+        f"/{_EMBED_MODEL}:embedContent?key={_API_KEY}"
+    )
+    response = httpx.post(
+        url,
+        json={
+            "content": {"parts": [{"text": text}]},
+            "outputDimensionality": 768,
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()["embedding"]["values"]
+
+
 def embed(texts: list[str]) -> list[list[float]]:
-    """Return 384-dim embedding vectors for a list of texts."""
-    return _model.encode(texts).tolist()
+    """Return 768-dim embedding vectors for a list of texts."""
+    return [_embed_one(t) for t in texts]
+
+
+def embed_single(text: str) -> list[float]:
+    """Embed a single text string."""
+    return _embed_one(text)
 
 
 def is_relevant_chunk(text: str) -> bool:

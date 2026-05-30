@@ -7,7 +7,6 @@ psycopg2-binary
 python-dotenv
 celery
 redis
-sentence-transformers
 httpx
 scrapy
 beautifulsoup4

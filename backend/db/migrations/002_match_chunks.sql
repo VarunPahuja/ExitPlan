@@ -2,7 +2,7 @@
 -- Run in Supabase SQL editor after 001_initial_schema.sql
 
 CREATE OR REPLACE FUNCTION match_policy_chunks(
-  query_embedding vector(384),
+  query_embedding vector(768),
   match_country_id uuid,
   match_count int DEFAULT 5
 )

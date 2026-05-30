@@ -64,7 +64,7 @@ CREATE TABLE policy_chunks (
   content TEXT NOT NULL,
   source_url TEXT,
   effective_date DATE,
-  embedding vector(384),
+  embedding vector(768),
   scraped_at TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX idx_policy_chunks_country ON policy_chunks(country_id);
