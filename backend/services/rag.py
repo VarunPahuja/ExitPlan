@@ -239,6 +239,19 @@ async def ask(
     context_parts = [
         f"{c['content']} (Source: {c['source_url']})" for c in chunks
     ]
+
+    if not context_parts:
+        yield json.dumps({
+            "chunk": (
+                f"I don't have specific policy documents for {country_code} in my "
+                f"database yet. Please check the official immigration website for "
+                f"the most accurate information."
+            ),
+            "done": True,
+            "citations": [],
+        })
+        return
+
     context = "\n\n".join(context_parts)
 
     prompt = (

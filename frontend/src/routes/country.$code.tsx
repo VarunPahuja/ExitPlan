@@ -644,33 +644,24 @@ function ChatPanel({ countryName, countryCode }: { countryName: string; countryC
         body: JSON.stringify({ query: q, country_code: countryCode, user_profile: {} }),
       });
 
-      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
+      const data = await res.json();
+      const urls = ((data.citations ?? []) as { source_url: string }[])
+        .map((c) => c.source_url)
+        .filter(Boolean)
+        .filter((u, i, arr) => arr.indexOf(u) === i)
+        .slice(0, 2);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const text = decoder.decode(value);
-        for (const line of text.split("\n")) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (!data.done && data.chunk) appendToLast(data.chunk);
-            if (data.done) {
-              const urls = ((data.citations ?? []) as { source_url: string }[])
-                .map((c) => c.source_url)
-                .filter(Boolean)
-                .filter((u, i, arr) => arr.indexOf(u) === i) // deduplicate
-                .slice(0, 2);
-              if (urls.length > 0) setCitationsOnLast(urls);
-            }
-          } catch {
-            // skip malformed SSE line
-          }
-        }
-      }
+      setMsgs((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "assistant",
+          text: data.response || "No response received.",
+          citations: urls,
+        };
+        return updated;
+      });
     } catch {
       appendToLast("Sorry, couldn't reach the backend. Make sure it's running on port 8000.");
     } finally {
