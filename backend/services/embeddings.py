@@ -12,7 +12,6 @@ from datetime import date
 
 import httpx
 
-_API_KEY = os.getenv("GEMINI_API_KEY", "")
 _EMBED_MODEL_PRIMARY = "gemini-embedding-001"
 _EMBED_MODEL_FALLBACK = "gemini-embedding-2"
 
@@ -43,11 +42,15 @@ def _content_hash(text: str) -> str:
 
 def _embed_one(text: str) -> list[float]:
     """Embed with primary model, fall back to secondary on rate limit."""
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY not set")
+
     for model in [_EMBED_MODEL_PRIMARY, _EMBED_MODEL_FALLBACK]:
         time.sleep(0.5)  # 2 req/sec max — safe for free tier
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models"
-            f"/{model}:embedContent?key={_API_KEY}"
+            f"/{model}:embedContent?key={api_key}"
         )
         try:
             response = httpx.post(
@@ -126,6 +129,12 @@ async def embed_and_store(
 
     Returns the total number of chunks successfully written to Supabase.
     """
+    if not os.getenv("GEMINI_API_KEY"):
+        raise RuntimeError(
+            "GEMINI_API_KEY environment variable not set. "
+            "Check your .env file."
+        )
+
     from db.client import admin_client
 
     client = admin_client()
