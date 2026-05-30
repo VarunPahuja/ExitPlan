@@ -12,9 +12,17 @@ Usage:
     python ingest.py
 """
 
-import asyncio
+import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env FIRST before any other imports so GEMINI_API_KEY is available
+load_dotenv()
+
+print(f"[debug] GEMINI_API_KEY loaded: {'YES' if os.getenv('GEMINI_API_KEY') else 'NO'}")
+
+import asyncio  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent))
 
