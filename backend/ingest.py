@@ -45,9 +45,10 @@ if __name__ == "__main__":
 
     # ── Progress estimate ──
     total_chunks = sum(len(chunk_text(doc["content"])) for doc in docs)
-    print(f"\n  Documents total           : {len(docs)}")
-    print(f"  Estimated chunks to embed : ~{total_chunks}")
-    print(f"  Estimated time at 0.5s/chunk: ~{total_chunks * 0.5 / 60:.0f} minutes")
+    print(f"\n  Documents total             : {len(docs)}")
+    print(f"  Estimated chunks to embed   : ~{total_chunks}")
+    print(f"  Estimated time at 0.6s/chunk: ~{total_chunks * 0.6 / 60:.0f} minutes")
+    print(f"  Using: gemini-embedding-001 + gemini-embedding-2 fallback")
     print(f"  (Already-stored chunks are skipped — resume-safe)\n")
 
     # ── Phase 2: Embed + store (asyncio, Twisted is fully done by now) ──

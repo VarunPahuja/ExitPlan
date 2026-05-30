@@ -233,8 +233,57 @@ def _mock_fallback(country_code: str, k: int) -> list[dict]:
 async def ask(
     query: str, country_code: str, user_profile: dict
 ) -> AsyncGenerator[str, None]:
-    """Retrieve context chunks, stream Gemini answer as SSE, then emit citations."""
-    chunks = await retrieve(query, country_code, k=10)
+    """Keyword-only retrieval then Gemini answer. No embedding API call for queries."""
+    code = country_code.upper()
+    chunks: list[dict] = []
+
+    try:
+        from db.client import admin_client
+        client = admin_client()
+
+        country_result = (
+            client.table("countries").select("id").eq("code", code).execute()
+        )
+        if country_result.data:
+            country_id = country_result.data[0]["id"]
+
+            # Try full query phrase first
+            result = (
+                client.table("policy_chunks")
+                .select("content, source_url, visa_type")
+                .eq("country_id", country_id)
+                .ilike("content", f"%{query}%")
+                .limit(8)
+                .execute()
+            )
+            chunks = [
+                {"content": r["content"], "source_url": r["source_url"], "visa_type": r["visa_type"]}
+                for r in (result.data or [])
+            ]
+
+            # If nothing, try individual meaningful words
+            if not chunks:
+                words = [w for w in query.lower().split() if len(w) > 3]
+                for word in words[:3]:
+                    result = (
+                        client.table("policy_chunks")
+                        .select("content, source_url, visa_type")
+                        .eq("country_id", country_id)
+                        .ilike("content", f"%{word}%")
+                        .limit(5)
+                        .execute()
+                    )
+                    if result.data:
+                        chunks = [
+                            {"content": r["content"], "source_url": r["source_url"], "visa_type": r["visa_type"]}
+                            for r in result.data
+                        ]
+                        break
+    except Exception as exc:
+        print(f"[rag.ask] keyword search error for {code}: {exc!r}")
+
+    if not chunks:
+        chunks = _mock_fallback(code, 5)
 
     context_parts = [
         f"{c['content']} (Source: {c['source_url']})" for c in chunks

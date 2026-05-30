@@ -13,7 +13,8 @@ from datetime import date
 import httpx
 
 _API_KEY = os.getenv("GEMINI_API_KEY", "")
-_EMBED_MODEL = "gemini-embedding-001"
+_EMBED_MODEL_PRIMARY = "gemini-embedding-001"
+_EMBED_MODEL_FALLBACK = "gemini-embedding-2"
 
 
 def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
@@ -41,14 +42,13 @@ def _content_hash(text: str) -> str:
 
 
 def _embed_one(text: str) -> list[float]:
-    """Call Gemini embedContent with rate limiting and retry logic."""
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models"
-        f"/{_EMBED_MODEL}:embedContent?key={_API_KEY}"
-    )
-    max_retries = 3
-    for attempt in range(max_retries):
-        time.sleep(0.5)  # 2 req/sec max — safe for free tier (~1500 RPM limit)
+    """Embed with primary model, fall back to secondary on rate limit."""
+    for model in [_EMBED_MODEL_PRIMARY, _EMBED_MODEL_FALLBACK]:
+        time.sleep(0.5)  # 2 req/sec max — safe for free tier
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models"
+            f"/{model}:embedContent?key={_API_KEY}"
+        )
         try:
             response = httpx.post(
                 url,
@@ -59,18 +59,18 @@ def _embed_one(text: str) -> list[float]:
                 timeout=30,
             )
             if response.status_code == 429:
-                wait = 60 * (attempt + 1)
-                print(f"  [rate limit] waiting {wait}s before retry {attempt + 1}/{max_retries}")
-                time.sleep(wait)
+                print(f"  [rate limit] {model} exhausted, trying fallback...")
                 continue
             response.raise_for_status()
             return response.json()["embedding"]["values"]
         except httpx.HTTPStatusError as e:
-            if attempt == max_retries - 1:
-                raise
-            print(f"  [retry {attempt + 1}] {e}")
-            time.sleep(10)
-    raise RuntimeError("Max retries exceeded for embedding")
+            print(f"  [error] {model}: {e}")
+            continue
+
+    # Both models exhausted — wait 60s and retry once
+    print("  [rate limit] both models exhausted, waiting 60s...")
+    time.sleep(60)
+    return _embed_one(text)
 
 
 def embed(texts: list[str]) -> list[list[float]]:
