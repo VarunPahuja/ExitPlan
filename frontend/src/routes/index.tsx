@@ -5,8 +5,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const HERO_IMG =
-  "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1800&q=80&auto=format&fit=crop";
+const HERO_IMG = "/hero-landscape.jpg";
 
 
 function DottedPath({ className = "" }: { className?: string }) {
