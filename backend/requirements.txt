@@ -1,6 +1,7 @@
 # Exit Plan — backend dependencies
 fastapi
 uvicorn[standard]
+gunicorn
 supabase
 psycopg2-binary
 python-dotenv
