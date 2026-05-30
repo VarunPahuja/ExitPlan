@@ -23,9 +23,16 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Always allow localhost:3000 for local dev plus whatever FRONTEND_URL is set to
-_frontend = os.getenv("FRONTEND_URL", "http://localhost:3000")
-_origins = list({_frontend, "http://localhost:3000", "http://localhost:5173"})
+# Allow local dev + production Vercel URL + whatever FRONTEND_URL is set to
+_frontend = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+_origins = list({
+    _frontend,
+    _frontend + "/",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://exit-plan-two.vercel.app",
+    "https://exit-plan-two.vercel.app/",
+})
 
 app.add_middleware(
     CORSMiddleware,
