@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Loader2, ExternalLink, RefreshCw } from "lucide-react";
 import { COUNTRIES, type Country } from "@/lib/countries";
 import { cn } from "@/lib/utils";
+import { Disclaimer } from "@/components/Disclaimer";
 
 export const Route = createFileRoute("/country/$code")({
   component: CountryDetail,
@@ -243,6 +244,10 @@ function CountryDetail() {
           <div className="flex items-center gap-4">
             <span className="text-5xl">{flag}</span>
             <h1 className="font-display text-4xl font-extrabold sm:text-5xl">{displayName}</h1>
+          </div>
+
+          <div className="mt-5">
+            <Disclaimer />
           </div>
 
           {/* Tab nav */}

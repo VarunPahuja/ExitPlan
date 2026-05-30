@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Share2, ArrowRight, Sparkles, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
+import { Disclaimer } from "@/components/Disclaimer";
 
 export const Route = createFileRoute("/results")({
   component: Results,
@@ -136,6 +137,8 @@ function Results() {
             </button>
           </div>
         </div>
+
+        <Disclaimer />
 
         {/* Two-column */}
         <div className="grid gap-8 lg:grid-cols-[45%_55%]">

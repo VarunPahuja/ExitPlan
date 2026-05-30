@@ -6,16 +6,10 @@ psycopg2-binary
 python-dotenv
 celery
 redis
-langchain
-langchain-community
 sentence-transformers
-flashrank
 httpx
 scrapy
-playwright
 beautifulsoup4
-spacy
-pytesseract
 resend
 pydantic
 pydantic-settings
