@@ -1,13 +1,11 @@
 """
 Australia immigration policy scraper — Scrapy spider.
 
-Source: en.wikipedia.org — Wikipedia's Immigration to Australia article (63K chars)
-covers skilled migration categories, point-based system, employer sponsorship,
-graduate visas, and PR pathways in detail. Plain HTML.
-
-immi.homeaffairs.gov.au is SharePoint-based and JavaScript-rendered; it returns
-an empty response to Scrapy. Wikipedia provides equivalent coverage with specific
-visa subclass information, eligibility criteria, and pathway details.
+Sources: en.wikipedia.org — Wikipedia articles covering Australian skilled migration.
+immi.homeaffairs.gov.au is SharePoint/JS-rendered (returns empty to Scrapy).
+visaguide.world URLs also returned no content. Wikipedia provides comprehensive
+coverage of skilled migration categories, points system, employer sponsorship,
+graduate visas, and PR pathways including subclass-specific detail.
 """
 
 import re
@@ -19,7 +17,6 @@ from bs4 import BeautifulSoup
 _URL_VISA_MAP = {
     "Immigration_to_Australia": "Australian Immigration System",
     "Points-based_immigration_system": "Points-Based Skilled Migration",
-    "Temporary_Skill_Shortage_visa": "Temporary Skill Shortage (482)",
 }
 
 _DEFAULT_URLS = [

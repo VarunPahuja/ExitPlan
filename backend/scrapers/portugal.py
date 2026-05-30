@@ -1,14 +1,14 @@
 """
 Portugal immigration policy scraper — Scrapy spider.
 
-Source: en.wikipedia.org — Wikipedia's Immigration to Portugal article (83K chars)
-covers D-series visa categories (D3 Tech Visa, D7, D8 Digital Nomad, D2 Entrepreneur),
-NHR tax regime, and PR/citizenship pathways. Plain HTML, no JS required.
+Sources: en.wikipedia.org — Wikipedia articles covering Portugal immigration.
+Immigration to Portugal (83K chars) covers D-series visas (D3 Tech, D7, D8 Digital
+Nomad, D2 Entrepreneur), NHR tax regime, and PR/citizenship pathways.
+Digital nomad visa (global article) provides additional D8 context.
 
-visaguide.world/europe/portugal-visa URLs were found to silently redirect to
-unrelated pages (French tech visa content appeared for Portuguese visa URLs), making
-the data unreliable. AIMA (formerly SEF) pages are in Portuguese only.
-Wikipedia provides comprehensive, factual coverage of Portugal's immigration options.
+visaguide.world/europe/portugal-visa URLs silently redirect to unrelated pages
+(French tech visa content appeared for Portuguese visa URLs — verified unreliable).
+AIMA (formerly SEF) pages are in Portuguese only.
 """
 
 import re
@@ -19,10 +19,12 @@ from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
     "Immigration_to_Portugal": "Portugal Immigration System",
+    "Digital_nomad_visa": "Digital Nomad Visa (D8)",
 }
 
 _DEFAULT_URLS = [
     "https://en.wikipedia.org/wiki/Immigration_to_Portugal",
+    "https://en.wikipedia.org/wiki/Digital_nomad_visa",
 ]
 
 

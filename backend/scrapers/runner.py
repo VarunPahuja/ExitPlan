@@ -241,10 +241,13 @@ if __name__ == "__main__":
         ))
 
     elif target == "australia":
-        print("Testing Australia scraper (Immigration_to_Australia — Wikipedia)...\n")
-        _print_preview(run_australia_scraper(
-            urls=["https://en.wikipedia.org/wiki/Immigration_to_Australia"]
-        ))
+        print("Testing Australia scraper (all 4 Wikipedia sources)...\n")
+        docs = run_australia_scraper()
+        print(f"  Pages scraped: {len(docs)}")
+        for d in docs:
+            print(f"  [{d['visa_type']}] {len(d['content'])} chars — {d['source_url']}")
+        if docs:
+            print(f"\n  Preview ({docs[0]['visa_type']}):\n  {docs[0]['content'][:300]}\n")
 
     elif target == "netherlands":
         print("Testing Netherlands scraper (highly-skilled-migrant)...\n")
@@ -259,10 +262,13 @@ if __name__ == "__main__":
         ))
 
     elif target == "uae":
-        print("Testing UAE scraper (Golden_visa — Wikipedia)...\n")
-        _print_preview(run_uae_scraper(
-            urls=["https://en.wikipedia.org/wiki/Golden_visa"]
-        ))
+        print("Testing UAE scraper (all 4 sources)...\n")
+        docs = run_uae_scraper()
+        print(f"  Pages scraped: {len(docs)}")
+        for d in docs:
+            print(f"  [{d['visa_type']}] {len(d['content'])} chars — {d['source_url']}")
+        if docs:
+            print(f"\n  Preview ({docs[0]['visa_type']}):\n  {docs[0]['content'][:300]}\n")
 
     elif target == "nz":
         print("Testing New Zealand scraper (accredited-employer-work-visa)...\n")
@@ -277,10 +283,13 @@ if __name__ == "__main__":
         ))
 
     elif target == "portugal":
-        print("Testing Portugal scraper (Immigration_to_Portugal — Wikipedia)...\n")
-        _print_preview(run_portugal_scraper(
-            urls=["https://en.wikipedia.org/wiki/Immigration_to_Portugal"]
-        ))
+        print("Testing Portugal scraper (Wikipedia: Immigration + Digital Nomad)...\n")
+        docs = run_portugal_scraper()
+        print(f"  Pages scraped: {len(docs)}")
+        for d in docs:
+            print(f"  [{d['visa_type']}] {len(d['content'])} chars — {d['source_url']}")
+        if docs:
+            print(f"\n  Preview ({docs[0]['visa_type']}):\n  {docs[0]['content'][:300]}\n")
 
     elif target == "all":
         print("Running all 10 scrapers (full crawl)...\n")

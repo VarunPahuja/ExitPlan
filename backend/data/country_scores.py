@@ -23,9 +23,9 @@ Job market scoring rubric (since no public 0-100 source exists per-field per-cou
 COUNTRY_DATA = {
     "GB": {
         "name": "United Kingdom",
-        # 5-year ILR currently, but earned settlement reform proposes 10 years from 2026/27.
-        # Scoring reflects current 5-year reality with downward pressure from uncertainty.
-        "pr_timeline": 50,
+        # 5-year ILR is current law. Proposed 10-year 'earned settlement' route not yet enacted.
+        # Score raised from 50 to 55: penalising for a reform that is proposed but not in force.
+        "pr_timeline": 55,
         # Skilled Worker visa relatively straightforward but salary thresholds raised 2024-25,
         # social care recruitment ended July 2025, eligible job list shrunk.
         "visa_ease": 65,
@@ -46,17 +46,19 @@ COUNTRY_DATA = {
 
     "CA": {
         "name": "Canada",
-        # Express Entry: ~7 months processing, total 9-18 months ITA-to-PR. Direct PR via EE.
-        "pr_timeline": 88,
-        # Points-based, high CRS cutoffs in 2024-25 but category-based draws help STEM/health/French.
-        # Open work permit via PGWP for students.
-        "visa_ease": 82,
+        # Express Entry: ~7 months processing, total 9-18 months ITA-to-PR.
+        # STEM category dormant 23+ months as of mid-2026. CRS cutoffs elevated (485-547 FSW).
+        # PR targets cut from 485k to 395k in 2025. Reduced from 88.
+        "pr_timeline": 78,
+        # CRS cutoffs elevated throughout 2024-25. Job offer bonus points removed March 2025.
+        # STEM category inactive. 2026 reality materially harder than prior years. Reduced from 82.
+        "visa_ease": 74,
         # Salaries moderate, Toronto/Vancouver housing crisis hurts ratio significantly.
         "salary_cost_ratio": 58,
         "language": 95,  # English (or French) is the official language; IELTS required.
         "job_market": {
-            "computer_science": 85,   # Tech category draws, AI hub growth in Toronto/Montreal
-            "data_science": 85,       # STEM category Express Entry draws
+            "computer_science": 74,   # STEM Express Entry category dormant; tech hiring contracted 2024-25
+            "data_science": 72,       # STEM category inactive; same contraction as CS
             "engineering": 82,        # consistent shortage, on most provincial NOC lists
             "business": 65,
             "medicine": 92,           # acute shortage, healthcare category draws prioritized
@@ -68,9 +70,10 @@ COUNTRY_DATA = {
 
     "DE": {
         "name": "Germany",
-        # EU Blue Card: 21 months with B1 German, 27 months with A1. Skilled worker: 4 years.
-        # German graduates: 2 years post-degree.
-        "pr_timeline": 90,
+        # EU Blue Card: 21 months with B1 German, 27 months without. Skilled worker: 4 years.
+        # Most Indian graduates arrive without B1 German; 27-month path is realistic baseline.
+        # Reduced from 90 to reflect this typical-case timeline.
+        "pr_timeline": 83,
         # Opportunity Card + Blue Card reforms 2024 made it among easiest in EU.
         # 163+ shortage occupations get reduced thresholds + waived priority check.
         "visa_ease": 88,
@@ -83,7 +86,7 @@ COUNTRY_DATA = {
             "data_science": 88,       # bottleneck profession, Blue Card threshold lowered
             "engineering": 95,        # Germany's #1 strength; massive shortage in mech/elec/auto
             "business": 60,           # German-language preferred
-            "medicine": 90,           # acute shortage, but Approbation + B2/C1 German required
+            "medicine": 68,           # B2/C1 German required for Approbation; near-absolute barrier for non-German speakers
             "law": 30,                # German law degree (Staatsexamen) required
             "design": 58,
             "finance": 68,            # Frankfurt finance hub, but smaller than London
@@ -137,7 +140,8 @@ COUNTRY_DATA = {
     "PT": {
         "name": "Portugal",
         # PR still 5 years (unchanged by 2026 nationality reform); citizenship now 10 yrs.
-        "pr_timeline": 55,
+        # 5-year path ≈ 58-60 on scale; AIMA backlogs justify small discount over 60. Raised from 55.
+        "pr_timeline": 58,
         # D7/D8/Tech visa accessible; AIMA backlogs have caused delays in 2024-25.
         "visa_ease": 60,
         # Salaries are by far the lowest of EU here; cost of living also low but ratio mediocre.
@@ -182,8 +186,8 @@ COUNTRY_DATA = {
         "name": "United Arab Emirates",
         # No traditional PR. Golden Visa = 10-year renewable residency (not citizenship/permanent).
         # Requires AED 30,000/month basic salary for skilled professional category.
-        # Scoring here reflects "long-term stay" not "permanent residence" in the western sense.
-        "pr_timeline": 35,
+        # Scoring reflects this is renewable residency, NOT permanent residence. Reduced from 35 to 22.
+        "pr_timeline": 22,
         # Employer-sponsored work visas are quick (weeks), but tied to employer.
         # Golden Visa easier if salary qualifies. No path to citizenship realistically.
         "visa_ease": 75,
@@ -270,7 +274,7 @@ CITATIONS = {
     "GB": {
         "pr_timeline": {
             "source": "gov.uk + Migration Observatory (Oxford)",
-            "note": "Currently 5-year ILR via Skilled Worker. White paper May 2025 proposes 10-year route under 'earned settlement' system, implementation expected 2026/27. Score reflects current rules with downward pressure from policy uncertainty.",
+            "note": "Currently 5-year ILR via Skilled Worker (score ~55). White paper May 2025 proposes 10-year 'earned settlement' route, but not yet enacted as of mid-2026. Score raised from 50 to 55: original score penalised for a reform that has not yet taken effect.",
             "url": "https://migrationobservatory.ox.ac.uk/resources/commentaries/changes-to-settlement-what-do-they-mean/",
             "cited": True,
         },
@@ -299,14 +303,14 @@ CITATIONS = {
 
     "CA": {
         "pr_timeline": {
-            "source": "IRCC processing times (March 2026)",
-            "note": "Express Entry CEC/FSW: ~7 months processing, total ITA-to-PR ~9-18 months. Among fastest direct-PR pathways globally.",
+            "source": "IRCC processing times (March 2026) + IRCC immigration levels plan 2025-2027",
+            "note": "Express Entry CEC/FSW: ~7 months processing, total ITA-to-PR ~9-18 months. However: STEM category dormant 23+ months as of mid-2026; CRS cutoffs 485-547 for FSW; annual PR targets cut from 485k to 395k (2025-2027 plan). Score reduced from 88 to 78 to reflect 2026 reality.",
             "url": "https://immigration.ca/canada-immigration-applications-processing-times/",
             "cited": True,
         },
         "visa_ease": {
-            "source": "IRCC Express Entry + category-based draws",
-            "note": "CRS cutoffs elevated in 2024-25 but STEM/healthcare/French category draws lowered thresholds. PGWP open work permit for students is significant advantage.",
+            "source": "IRCC Express Entry + category-based draws (2026 audit)",
+            "note": "CRS cutoffs elevated throughout 2024-25. Job offer bonus points removed March 2025. STEM category inactive as of mid-2026. These factors make EE substantially harder for Indian tech graduates than the pre-2024 baseline suggested. Score reduced from 82 to 74.",
             "cited": True,
         },
         "salary_cost_ratio": {
@@ -316,8 +320,8 @@ CITATIONS = {
         },
         "language": {"source": "IRCC IELTS/CELPIP requirements", "note": "CLB 7+ typical", "cited": True},
         "job_market": {
-            "computer_science": {"source": "IRCC STEM category-based Express Entry draws", "note": "cited: STEM is explicit Express Entry priority", "cited": True},
-            "data_science": {"source": "IRCC STEM category", "note": "cited", "cited": True},
+            "computer_science": {"source": "IRCC STEM category-based Express Entry draws", "note": "STEM category dormant 23+ months mid-2026; tech hiring in Canada contracted through 2024-25. Score reduced from 85 to 74.", "cited": True},
+            "data_science": {"source": "IRCC STEM category", "note": "Same STEM category dormancy affects data science. Score reduced from 85 to 72.", "cited": True},
             "engineering": {"source": "Provincial NOC in-demand lists (ON, BC, AB)", "note": "cited", "cited": True},
             "business": {"source": "general market", "note": "inferred", "cited": False},
             "medicine": {"source": "IRCC healthcare category-based draws", "note": "cited: explicit category", "cited": True},
@@ -330,7 +334,7 @@ CITATIONS = {
     "DE": {
         "pr_timeline": {
             "source": "§9 AufenthG + BAMF / EU Blue Card Germany 2026 (Aldag Legal)",
-            "note": "EU Blue Card: 27 months → Niederlassungserlaubnis, 21 months with B1 German. German graduates: 2 years. Skilled worker: 4 years.",
+            "note": "EU Blue Card: 21 months with B1 German, 27 months without. Most Indian graduates arrive without B1 German, making 27 months the realistic baseline, not best-case. German graduates: 2 years. Skilled worker: 4 years. Score reduced from 90 to 83 to reflect the typical (not best-case) path.",
             "url": "https://aldaglegal.com/en/eu-blue-card-germany-2026/",
             "cited": True,
         },
@@ -354,7 +358,7 @@ CITATIONS = {
             "data_science": {"source": "Bottleneck occupation list", "note": "cited as IT/data category", "cited": True},
             "engineering": {"source": "DIHK Skilled Labour Report 2025/2026; mech/elec/auto engineering on bottleneck list", "note": "cited", "cited": True},
             "business": {"source": "general market", "note": "inferred; German-language preference reduces score for non-native", "cited": False},
-            "medicine": {"source": "DIHK report: ~46k healthcare vacancies, top shortage category", "note": "cited; but Approbation + B2/C1 German required", "cited": True},
+            "medicine": {"source": "DIHK report: ~46k healthcare vacancies + Approbationsordnung für Ärzte", "note": "Demand is real, but B2/C1 German is required for Approbation (medical licence). Near-absolute barrier for Indian graduates without German. Score reduced from 90 to 68 to reflect accessibility, not just demand.", "cited": True},
             "law": {"source": "Staatsexamen requirement", "note": "inferred from structural barrier to foreign-trained lawyers", "cited": False},
             "design": {"source": "general market", "note": "inferred", "cited": False},
             "finance": {"source": "Frankfurt finance sector + general knowledge", "note": "inferred", "cited": False},
@@ -423,7 +427,7 @@ CITATIONS = {
     "PT": {
         "pr_timeline": {
             "source": "Lei Orgânica n.º 1/2026 + Lei 23/2007",
-            "note": "PR (autorização de residência permanente) still 5 years - UNCHANGED by 2026 reform. Citizenship extended from 5 to 10 years (7 for CPLP/EU). D7/D8/Tech visa all viable.",
+            "note": "PR (autorização de residência permanente) still 5 years — UNCHANGED by 2026 reform. Citizenship extended from 5 to 10 years (7 for CPLP/EU). A 5-year path scores ~58-60 on the scale; AIMA processing backlogs justify a small reduction from 60. Score raised from 55 to 58: original score was too pessimistic given the unchanged 5-year PR rule.",
             "url": "https://www.theportugalnews.com/news/2026-05-08/portugals-new-nationality-law-why-permanent-residency-is-the-goal-worth-focusing-on/1019162",
             "cited": True,
         },
@@ -487,7 +491,7 @@ CITATIONS = {
     "AE": {
         "pr_timeline": {
             "source": "UAE Golden Visa rules (ICP/GDRFA)",
-            "note": "No traditional PR/citizenship for typical workers. Golden Visa = 10-year renewable residency for AED 30,000+/month basic salary skilled professionals. Score reflects this is renewable residency, NOT permanent residence in legal sense.",
+            "note": "UAE has no traditional PR pathway. Golden Visa = 10-year renewable residency (not permanent residence) for AED 30,000+/month basic salary. No path to citizenship for typical workers. Score reduced from 35 to 22 to better reflect the absence of a genuine permanent-residence route; 20 = no real PR pathway on the scale.",
             "url": "https://www.globalcitizensolutions.com/golden-visa-uae/",
             "cited": True,
         },

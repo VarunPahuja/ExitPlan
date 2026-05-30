@@ -1,14 +1,14 @@
 """
 UAE immigration policy scraper — Scrapy spider.
 
-Sources: en.wikipedia.org — Wikipedia's Golden visa article (47K chars) covers the
-UAE Golden Visa program in depth, including investor requirements, salary thresholds,
-10-year renewable visa rules, and eligible professions. The Expatriates in the UAE
-article (19K chars) covers work permit categories and employer sponsorship.
+Sources: en.wikipedia.org — Wikipedia articles covering UAE immigration programs.
+Golden visa (47K chars) covers the 10-year renewable visa, investor and skilled
+professional requirements. Immigration to UAE covers general work permit categories.
+DIFC article provides finance/free-zone employment context.
 
-u.ae (official portal) and government.ae both TCP-timeout from non-UAE IP addresses —
-they appear geo-blocked. mohre.gov.ae requires session authentication. Wikipedia
-provides verified, detailed coverage of UAE immigration categories.
+u.ae and government.ae TCP-timeout from non-UAE IPs (geo-blocked). mohre.gov.ae
+requires session auth. globalcitizensolutions.com and expatica.com tested but
+returned no content to Scrapy.
 """
 
 import re
@@ -19,12 +19,16 @@ from bs4 import BeautifulSoup
 
 _URL_VISA_MAP = {
     "Golden_visa": "Golden Visa",
-    "Expatriates_in_the_United_Arab_Emirates": "UAE Work & Residency",
+    "Immigration_to_the_United_Arab_Emirates": "UAE Work & Residency",
+    "Dubai_International_Financial_Centre": "DIFC Free Zone Employment",
+    "golden-visa-uae": "UAE Golden Visa (Practical Guide)",
 }
 
 _DEFAULT_URLS = [
-    "https://en.wikipedia.org/wiki/Golden_visa",
     "https://en.wikipedia.org/wiki/Immigration_to_the_United_Arab_Emirates",
+    "https://en.wikipedia.org/wiki/Golden_visa",
+    "https://en.wikipedia.org/wiki/Dubai_International_Financial_Centre",
+    "https://www.globalcitizensolutions.com/golden-visa-uae/",
 ]
 
 
