@@ -21,3 +21,12 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Internal dev docs — tracked locally, not on GitHub
+CONTEXT.md
+DECISIONS.md
+API_CONTRACT.md
+PROMPTS.md
+curated_immigration_data.md
+curated_immigration_data_2.md
+curated_immigration.md
