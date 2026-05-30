@@ -71,6 +71,7 @@ async def get_country(code: str):
         },
         "visa_types": meta["visa_types"],
         "pr_timeline_years": meta["pr_timeline_years"],
+        "pr_breakdown": meta.get("pr_breakdown", {}),
         "recent_changes": recent_changes,
         "key_facts": key_facts,
     }

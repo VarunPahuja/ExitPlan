@@ -257,16 +257,146 @@ COUNTRY_DATA = {
 
 # Display metadata — visa programme names and estimated years to PR/long-term residence
 COUNTRY_META: dict[str, dict] = {
-    "GB": {"visa_types": ["Skilled Worker", "Graduate Route", "Global Talent"],          "pr_timeline_years": 5},
-    "CA": {"visa_types": ["Express Entry", "PNP", "PGWP → PR"],                          "pr_timeline_years": 3},
-    "DE": {"visa_types": ["EU Blue Card", "Job Seeker Visa", "Skilled Immigration Act"],  "pr_timeline_years": 2},
-    "AU": {"visa_types": ["Skilled Independent (189)", "Employer Sponsored (482)", "Graduate (485)"], "pr_timeline_years": 3},
-    "NL": {"visa_types": ["Highly Skilled Migrant", "Orientation Year", "EU Blue Card"],  "pr_timeline_years": 5},
-    "PT": {"visa_types": ["D3 Tech Visa", "D8 Digital Nomad Visa", "Job Seeker Visa"],    "pr_timeline_years": 5},
-    "IE": {"visa_types": ["Critical Skills Employment Permit", "General Employment Permit", "Stamp 4"], "pr_timeline_years": 2},
-    "AE": {"visa_types": ["Golden Visa", "Employment Visa", "Green Visa"],                "pr_timeline_years": 10},
-    "NZ": {"visa_types": ["Skilled Migrant", "Accredited Employer Work Visa", "Green List Straight to Residence"], "pr_timeline_years": 3},
-    "SG": {"visa_types": ["Employment Pass", "S Pass", "Personalised Employment Pass"],   "pr_timeline_years": 7},
+    "GB": {
+        "visa_types": ["Skilled Worker", "Graduate Route", "Global Talent"],
+        "pr_timeline_years": 5,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 55,
+                "label": "Skilled Worker visa ties you to sponsor for 5 years. No employer-free status until ILR.",
+            },
+            "permanent_residence": {
+                "score": 55,
+                "label": "ILR after 5 years continuous Skilled Worker employment. 10-year route proposed but not enacted.",
+            },
+        },
+    },
+    "CA": {
+        "visa_types": ["Express Entry", "PNP", "PGWP → PR"],
+        "pr_timeline_years": 3,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 85,
+                "label": "PR via Express Entry grants full employer independence. PGWP is open permit.",
+            },
+            "permanent_residence": {
+                "score": 78,
+                "label": "Direct PR via Express Entry — no separate PR step after ITA. Among fastest globally.",
+            },
+        },
+    },
+    "DE": {
+        "visa_types": ["EU Blue Card", "Job Seeker Visa", "Skilled Immigration Act"],
+        "pr_timeline_years": 2,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 75,
+                "label": "Blue Card holders can change employer after 12 months with authority notification.",
+            },
+            "permanent_residence": {
+                "score": 95,
+                "label": "Niederlassungserlaubnis after 21 months (B1 German) or 27 months. Strongest PR route in EU.",
+            },
+        },
+    },
+    "AU": {
+        "visa_types": ["Skilled Independent (189)", "Employer Sponsored (482)", "Graduate (485)"],
+        "pr_timeline_years": 3,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 90,
+                "label": "189/190 PR grants immediate full employer independence and open work rights.",
+            },
+            "permanent_residence": {
+                "score": 85,
+                "label": "Points-based PR via SkillSelect. Invitation timelines vary by occupation and state.",
+            },
+        },
+    },
+    "NL": {
+        "visa_types": ["Highly Skilled Migrant", "Orientation Year", "EU Blue Card"],
+        "pr_timeline_years": 5,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 50,
+                "label": "Kennismigrant permit is employer-tied. Full independence only at 5-year PR.",
+            },
+            "permanent_residence": {
+                "score": 60,
+                "label": "Permanent residence after 5 years. Requires A2 Dutch civic integration exam.",
+            },
+        },
+    },
+    "PT": {
+        "visa_types": ["D3 Tech Visa", "D8 Digital Nomad Visa", "Job Seeker Visa"],
+        "pr_timeline_years": 5,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 65,
+                "label": "D3/D8 visa allows job changes with AIMA notification. Relatively flexible.",
+            },
+            "permanent_residence": {
+                "score": 58,
+                "label": "PR after 5 years. AIMA processing backlogs add uncertainty to timeline.",
+            },
+        },
+    },
+    "IE": {
+        "visa_types": ["Critical Skills Employment Permit", "General Employment Permit", "Stamp 4"],
+        "pr_timeline_years": 2,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 95,
+                "label": "Stamp 4 after ~2 years — full employer independence, self-employment allowed. Best in EU.",
+            },
+            "permanent_residence": {
+                "score": 65,
+                "label": "Long-Term Residency after 5 years. Citizenship after 5 years. Ireland allows dual nationality but India does not.",
+            },
+        },
+    },
+    "AE": {
+        "visa_types": ["Golden Visa", "Employment Visa", "Green Visa"],
+        "pr_timeline_years": 10,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 30,
+                "label": "Employment visa is employer-tied. Changing jobs requires new visa. Golden Visa breaks this dependency.",
+            },
+            "permanent_residence": {
+                "score": 15,
+                "label": "No traditional PR or citizenship pathway for most workers. Golden Visa is 10-year renewable residency only.",
+            },
+        },
+    },
+    "NZ": {
+        "visa_types": ["Skilled Migrant", "Accredited Employer Work Visa", "Green List Straight to Residence"],
+        "pr_timeline_years": 3,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 85,
+                "label": "Skilled Migrant PR grants immediate full work independence. Green List Tier 1 gets direct PR.",
+            },
+            "permanent_residence": {
+                "score": 80,
+                "label": "Clear points-based PR pathway. Processing 40-124 days after selection.",
+            },
+        },
+    },
+    "SG": {
+        "visa_types": ["Employment Pass", "S Pass", "Personalised Employment Pass"],
+        "pr_timeline_years": 7,
+        "pr_breakdown": {
+            "employer_independence": {
+                "score": 45,
+                "label": "EP tied to employer until PR. Job changes require new EP application and approval.",
+            },
+            "permanent_residence": {
+                "score": 45,
+                "label": "PR is discretionary — no guaranteed pathway. ICA does not publish criteria. ~35-40k PRs granted annually.",
+            },
+        },
+    },
 }
 
 

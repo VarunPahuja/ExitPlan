@@ -21,6 +21,8 @@ type Tab = (typeof TABS)[number];
 
 // ——— Types ———
 
+type PRBreakdownItem = { score: number; label: string };
+
 type CountryDetail = {
   code: string;
   name: string;
@@ -32,6 +34,10 @@ type CountryDetail = {
   };
   visa_types: string[];
   pr_timeline_years: number;
+  pr_breakdown?: {
+    employer_independence?: PRBreakdownItem;
+    permanent_residence?: PRBreakdownItem;
+  };
   recent_changes: Array<{
     id: string;
     visa_type: string;
@@ -410,6 +416,36 @@ function PRPathwayTab({ detail }: { detail: CountryDetail }) {
       <p className="mt-2 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-sm leading-relaxed text-amber-800">
         {pathway.note}
       </p>
+
+      {detail.pr_breakdown && (detail.pr_breakdown.employer_independence || detail.pr_breakdown.permanent_residence) && (
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {detail.pr_breakdown.employer_independence && (
+            <PRBreakdownCard
+              title="Employer Independence"
+              item={detail.pr_breakdown.employer_independence}
+            />
+          )}
+          {detail.pr_breakdown.permanent_residence && (
+            <PRBreakdownCard
+              title="Permanent Residence"
+              item={detail.pr_breakdown.permanent_residence}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PRBreakdownCard({ title, item }: { title: string; item: PRBreakdownItem }) {
+  return (
+    <div className="rounded-xl border border-border bg-background p-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      <p className="mt-1 font-display text-2xl font-bold text-primary">{item.score}</p>
+      <div className="mt-2 h-1.5 rounded-full bg-black/[0.06]">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${item.score}%` }} />
+      </div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.label}</p>
     </div>
   );
 }
