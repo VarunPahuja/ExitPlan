@@ -1,11 +1,13 @@
 """
 Gemini embedding pipeline via REST API.
 
-Uses text-embedding-004 (768 dimensions) through the Gemini REST API with
+Uses gemini-embedding-001 (768 dimensions) through the Gemini REST API with
 httpx — same approach as llm.py. No local model weights, zero RAM overhead.
 """
 
+import hashlib
 import os
+import time
 from datetime import date
 
 import httpx
@@ -34,22 +36,41 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
     return chunks
 
 
+def _content_hash(text: str) -> str:
+    return hashlib.md5(text.encode()).hexdigest()[:16]
+
+
 def _embed_one(text: str) -> list[float]:
-    """Call the Gemini embedContent REST endpoint for a single text."""
+    """Call Gemini embedContent with rate limiting and retry logic."""
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models"
         f"/{_EMBED_MODEL}:embedContent?key={_API_KEY}"
     )
-    response = httpx.post(
-        url,
-        json={
-            "content": {"parts": [{"text": text}]},
-            "outputDimensionality": 768,
-        },
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()["embedding"]["values"]
+    max_retries = 3
+    for attempt in range(max_retries):
+        time.sleep(0.5)  # 2 req/sec max — safe for free tier (~1500 RPM limit)
+        try:
+            response = httpx.post(
+                url,
+                json={
+                    "content": {"parts": [{"text": text}]},
+                    "outputDimensionality": 768,
+                },
+                timeout=30,
+            )
+            if response.status_code == 429:
+                wait = 60 * (attempt + 1)
+                print(f"  [rate limit] waiting {wait}s before retry {attempt + 1}/{max_retries}")
+                time.sleep(wait)
+                continue
+            response.raise_for_status()
+            return response.json()["embedding"]["values"]
+        except httpx.HTTPStatusError as e:
+            if attempt == max_retries - 1:
+                raise
+            print(f"  [retry {attempt + 1}] {e}")
+            time.sleep(10)
+    raise RuntimeError("Max retries exceeded for embedding")
 
 
 def embed(texts: list[str]) -> list[list[float]]:
@@ -100,10 +121,10 @@ async def embed_and_store(
 ) -> int:
     """Chunk, embed, and insert documents into the policy_chunks table.
 
-    Returns the total number of chunks successfully written to Supabase.
+    Resume-safe: chunks already in the DB are skipped by content hash so a
+    crashed run can be restarted without duplicating work.
 
-    use_string_format=True  → embedding sent as '[v1,v2,...]' string
-    use_string_format=False → embedding sent as plain Python list[float]
+    Returns the total number of chunks successfully written to Supabase.
     """
     from db.client import admin_client
 
@@ -130,16 +151,33 @@ async def embed_and_store(
         for c in chunks:
             if is_relevant_chunk(c):
                 filtered.append(c)
-            else:
-                print("  [SKIP] irrelevant chunk")
 
         if not filtered:
             continue
 
-        vectors = embed(filtered)
-        ok = 0
+        # Build set of already-stored hashes for this country so we can resume
+        existing_result = (
+            client.table("policy_chunks")
+            .select("content")
+            .eq("country_id", country_id)
+            .execute()
+        )
+        existing_hashes = {
+            _content_hash(r["content"]) for r in (existing_result.data or [])
+        }
 
-        for chunk, vector in zip(filtered, vectors):
+        ok = 0
+        for chunk in filtered:
+            if _content_hash(chunk) in existing_hashes:
+                ok += 1  # already stored from a previous run
+                continue
+
+            try:
+                vector = _embed_one(chunk)
+            except Exception as e:
+                print(f"  [error] embedding failed: {e} | {chunk[:50]!r}")
+                continue
+
             embedding_value = (
                 "[" + ",".join(f"{v:.8f}" for v in vector) + "]"
                 if use_string_format

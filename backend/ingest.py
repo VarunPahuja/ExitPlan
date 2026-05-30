@@ -18,8 +18,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from scrapers.runner import run_all_scrapers  # noqa: E402  (import before asyncio starts)
-from services.embeddings import embed_and_store  # noqa: E402
+from scrapers.runner import run_all_scrapers  # noqa: E402
+from services.embeddings import embed_and_store, chunk_text  # noqa: E402
 
 
 async def _store(docs: list[dict]) -> int:
@@ -42,6 +42,13 @@ if __name__ == "__main__":
     if not docs:
         print("No documents found — check scraper output and manual_docs/.")
         sys.exit(1)
+
+    # ── Progress estimate ──
+    total_chunks = sum(len(chunk_text(doc["content"])) for doc in docs)
+    print(f"\n  Documents total           : {len(docs)}")
+    print(f"  Estimated chunks to embed : ~{total_chunks}")
+    print(f"  Estimated time at 0.5s/chunk: ~{total_chunks * 0.5 / 60:.0f} minutes")
+    print(f"  (Already-stored chunks are skipped — resume-safe)\n")
 
     # ── Phase 2: Embed + store (asyncio, Twisted is fully done by now) ──
     print("Phase 2 — Embedding and storing chunks...")
